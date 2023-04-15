@@ -11,7 +11,7 @@ app.use(function (req, res, next) {
     next();
 });
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: '*' } });
+const io = socketIo(server, { cors: { origin: '*' }, perMessageDeflate: false, });
 
 
 // Set up a namespace for Socket.io
