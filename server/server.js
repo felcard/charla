@@ -12,7 +12,6 @@ app.use(cors());
 // });
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' }, perMessageDeflate: false, transports: ['websocket'] });
-io.set('transports', ['websocket']);
 
 
 // Set up a namespace for Socket.io
