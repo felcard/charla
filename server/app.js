@@ -1,7 +1,8 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
 const cors = require('cors');
+const socketIo = require('socket.io');
+
 
 const app = express();
 app.use(cors());
@@ -10,14 +11,24 @@ app.use(cors());
 //     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 //     next();
 // });
-const server = http.createServer(app);
-const io = socketIo(server, {
+//const server = http.createServer(app);
+
+// Start the server
+const port = process.env.PORT || 3001;
+const server = app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+
+
+const io = socketIo({
     perMessageDeflate: false,
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
     },
-});
+}).listen(server);
+
+
 
 
 // Set up a namespace for Socket.io
@@ -37,8 +48,3 @@ chatNamespace.on('connection', (socket) => {
     });
 });
 
-// Start the server
-const port = process.env.PORT || 3001;
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
