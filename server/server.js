@@ -11,7 +11,7 @@ app.use(cors());
 //     next();
 // });
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: '*' }, perMessageDeflate: false, transports: ['websocket', 'xhr-polling'] });
+const io = socketIo(server, { cors: { origin: '*' }, transports: ['websocket', 'xhr-polling'] });
 
 
 // Set up a namespace for Socket.io
