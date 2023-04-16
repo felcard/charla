@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
 
 
 });
-
+const { PORT = 8000 } = process.env.PORT;
 server.listen(8000, () => {
     console.log('listening on *:8000');
 });
