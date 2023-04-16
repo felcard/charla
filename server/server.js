@@ -23,6 +23,6 @@ io.on('connection', (socket) => {
 
 });
 const { PORT = 8000 } = process.env.PORT;
-server.listen(8000, () => {
+server.listen(PORT, () => {
     console.log('listening on *:8000');
 });
