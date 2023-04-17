@@ -13,10 +13,10 @@ server.listen(PORT, () => {
 });
 
 module.exports = new Server(server,
-    //     {
-    //     cors: {
-    //         origin: true,
-    //         allowedHeaders: ['Content-Type', 'Authorization']
-    //     }
-    // }
+    {
+        cors: {
+            origin: true,
+            allowedHeaders: ['Content-Type', 'Authorization']
+        }
+    }
 );
