@@ -2,3 +2,4 @@ node_modules
 tester.js
 web.config
 backup.js
+*.env

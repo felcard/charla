@@ -5,14 +5,35 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const mongoose = require('mongoose');
+require('dotenv').config({
+    path: `${__dirname}/mongo.env`
+});
+const mongoPath = process.env.ATLAS_URI;
+mongoose.connect(mongoPath, {
+    useNewUrlParser: true, useUnifiedTopology: true,
+});
+const Code = mongoose.model('code', {
+    id: { type: String, default: "codigo" },
+    session: { type: String },
+    duration: { type: String, default: "1h" }
+});
+
+//if using the following method to retrieve collections where we dont specified schema: const Code = mongoose.model('code', {});
+//we then need to use the  method lean() as in: 
+//Code.find().then(data => console.log(data[0].id));
+//above turns mongoose document into a javascript object. at first sight they look the same but they dont work the same way
+
 
 const login = io.of('/login');
 
 login.on('connection', socket => {
     console.log('LOGIN connection ON');
 
-    socket.on('code', data => {
-        console.log('DOS', data);
+    socket.on('code', async data => {
+        const word = await Code.find();
+        const alert = word[0].id === data ? 'YES!' : 'NO!';
+        socket.emit('code', alert);
     });
 
     socket.on('disconnect', () => {
