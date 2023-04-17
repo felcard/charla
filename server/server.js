@@ -6,6 +6,20 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 
+const login = io.of('/login');
+
+login.on('connection', socket => {
+    console.log('LOGIN connection ON');
+
+    socket.on('code', data => {
+        console.log('DOS', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected from LOGIN');
+    });
+});
+
 io.on('connection', (socket) => {
     console.log('a user connected');
 
@@ -17,12 +31,12 @@ io.on('connection', (socket) => {
 
     // Listen for disconnection
     socket.on('disconnect', () => {
-        console.log('User disconnected from chat namespace.');
+        console.log('User disconnected from MAIN');
     });
 
 
 });
-const { PORT = 8000 } = process.env.PORT;
+const { PORT = 8000 } = process.env;
 server.listen(PORT, () => {
     console.log('listening on *:8000');
 });
