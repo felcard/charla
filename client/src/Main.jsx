@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import React, { useState, useEffect } from "react";
 
-const socket = io("http://localhost:8000", {
+const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
 });
 
