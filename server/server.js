@@ -27,14 +27,25 @@ const Code = mongoose.model('code', {
 
 const login = io.of('/login');
 
+const auth = async (socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+        return next(new Error('Token unavailable'));
+    }
+    const word = await Code.find();
+    if (word[0].id !== token) {
+        return next(new Error('Token unavailable'));
+    }
+    next();
+
+};
+
+login.use(auth);
+
 login.on('connection', socket => {
     console.log('LOGIN connection ON');
 
-    socket.on('code', async data => {
-        const word = await Code.find();
-        const alert = word[0].id === data ? 'YES!' : 'NO!';
-        socket.emit('code', alert);
-    });
+    socket.emit('code', 'YOU DID IT!!');
 
     socket.on('disconnect', () => {
         console.log('User disconnected from LOGIN');
