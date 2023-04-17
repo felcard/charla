@@ -12,9 +12,4 @@ server.listen(PORT, () => {
     console.log('listening on *:8000');
 });
 
-module.exports = new Server(server, {
-    cors: {
-        origin: true,
-        allowedHeaders: ['Content-Type', 'Authorization']
-    }
-});
+module.exports = new Server(server);
