@@ -1,9 +1,9 @@
 const express = require('express');
-const cors = require('cors');
+//const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
 const app = express();
-app.use(cors());
+//app.use(cors());
 const server = http.createServer(app);
 //const io = new Server(server);
 
@@ -13,10 +13,11 @@ server.listen(PORT, () => {
 });
 
 module.exports = new Server(server,
-    {
-        cors: {
-            origin: true,
-            allowedHeaders: ['Content-Type', 'Authorization']
-        }
-    }
+    { cors: { origin: '*' } }
+    // {
+    //     cors: {
+    //         origin: true,
+    //         allowedHeaders: ['Content-Type', 'Authorization']
+    //     }
+    // }
 );
