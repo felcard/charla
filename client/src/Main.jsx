@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import React, { useState, useEffect } from "react";
 
-const socket = io("socket-fel.koyeb.app/", {
+const socket = io("http://localhost:8000/", {
   transports: ["websocket", "xhr-polling"],
 });
 
@@ -35,11 +35,6 @@ export default function Main() {
   return (
     <div id="main-chat">
       <h1>MAIN ROOM</h1>
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>{message.text}</li>
-        ))}
-      </ul>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -49,6 +44,11 @@ export default function Main() {
         />
         <button type="submit">Send</button>
       </form>
+      <ul>
+        {messages.map((message, index) => (
+          <li key={index}>{message.text}</li>
+        ))}
+      </ul>
     </div>
   );
 }
