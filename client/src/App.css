@@ -1,7 +1,23 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
 .App {
   text-align: center;
 }
 
 .App-link {
   color: #61dafb;
+}
+#main-chat,
+#dos-chat {
+  color: rgb(126, 23, 23);
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  background: rgb(185, 172, 114);
+}
+#dos-chat {
+  color: goldenrod;
+  background: rgb(77, 117, 77);
 }
