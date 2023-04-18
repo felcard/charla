@@ -6,7 +6,7 @@ const socket = io("socket-fel.koyeb.app/login", {
   //auth: { token: "codigo" },
 });
 
-export default function Main() {
+export default function Dos() {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
