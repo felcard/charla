@@ -1,36 +1,31 @@
-// const io = require('./connection');
-// //const auth = require('./middleware');
-// const { loginSpace, mainSpace } = require('./namespaces');
-
-// const login = io.of('/login');
-
-// //login.use(auth);
-
-// login.on('connection', loginSpace);
-
-// io.on('connection', mainSpace);
-
 const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server);
 
+///////////////////MONGO/////////////added second
+// const mongoose = require('mongoose');
+// require('dotenv').config({
+//     path: `${__dirname}/mongo.env`
+// });
+// const mongoPath = process.env.ATLAS_URI;
+// mongoose.connect(mongoPath, {
+//     useNewUrlParser: true, useUnifiedTopology: true,
+// });
+// const Code = mongoose.model('code', {
+//     id: { type: String, default: "codigo" },
+//     session: { type: String },
+//     duration: { type: String, default: "1h" }
+// });
 
-const login = io.of('/login');
+//if using the following method to retrieve collections where we dont specified schema: const Code = mongoose.model('code', {});
+//we then need to use the  method lean() as in: 
+//Code.find().then(data => console.log(data[0].id));
+//above turns mongoose document into a javascript object. at first sight they look the same but they dont work the same way
+////////////////////////
 
-login.on('connection', socket => {
-    console.log('LOGIN connection ON');
-
-    socket.on('code', data => {
-        console.log('DOS', data);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected from LOGIN');
-    });
-});
 
 io.on('connection', (socket) => {
     console.log('a user connected');
@@ -43,7 +38,7 @@ io.on('connection', (socket) => {
 
     // Listen for disconnection
     socket.on('disconnect', () => {
-        console.log('User disconnected from MAIN');
+        console.log('User disconnected from chat namespace.');
     });
 
 

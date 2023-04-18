@@ -3,3 +3,7 @@ tester.js
 web.config
 backup.js
 *.env
+connection.js
+middleware.js
+mongo.js
+namespaces.js
