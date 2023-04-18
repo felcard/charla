@@ -5,20 +5,20 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, { cors: { origin: "https://beautiful-tarsier-8e762a.netlify.app", credentials: true } });
 
-///////////////////MONGO/////////////added second
-// const mongoose = require('mongoose');
-// require('dotenv').config({
-//     path: `${__dirname}/mongo.env`
-// });
-// const mongoPath = process.env.ATLAS_URI;
-// mongoose.connect(mongoPath, {
-//     useNewUrlParser: true, useUnifiedTopology: true,
-// });
-// const Code = mongoose.model('code', {
-//     id: { type: String, default: "codigo" },
-//     session: { type: String },
-//     duration: { type: String, default: "1h" }
-// });
+///////////////////MONGO/////////////
+const mongoose = require('mongoose');
+require('dotenv').config({
+    path: `${__dirname}/mongo.env`
+});
+const mongoPath = process.env.ATLAS_URI;
+mongoose.connect(mongoPath, {
+    useNewUrlParser: true, useUnifiedTopology: true,
+});
+const Code = mongoose.model('code', {
+    id: { type: String, default: "codigo" },
+    session: { type: String },
+    duration: { type: String, default: "1h" }
+});
 
 //if using the following method to retrieve collections where we dont specified schema: const Code = mongoose.model('code', {});
 //we then need to use the  method lean() as in: 
@@ -27,11 +27,12 @@ const io = new Server(server, { cors: { origin: "https://beautiful-tarsier-8e762
 ////////////////////////
 const login = io.of('/login');
 
-login.on('connection', (socket) => {
+login.on('connection', async (socket) => {
     console.log('a user connected LOGIN');
-
+    const kodigo = await Code.find();
+    console.log(kodigo);
     // Listen for incoming messages
-    socket.emit('code', 'BE GRATEFUL!!!!!');
+    socket.emit('code', kodigo[0].session);
 
     // Listen for disconnection
     socket.on('disconnect', () => {
