@@ -25,10 +25,24 @@ const io = new Server(server, { cors: { origin: "https://beautiful-tarsier-8e762
 //Code.find().then(data => console.log(data[0].id));
 //above turns mongoose document into a javascript object. at first sight they look the same but they dont work the same way
 ////////////////////////
+const login = io.of('/login');
 
+login.on('connection', (socket) => {
+    console.log('a user connected LOGIN');
+
+    // Listen for incoming messages
+    socket.emit('code', 'BE GRATEFUL!!!!!');
+
+    // Listen for disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected from LOGIN.');
+    });
+
+
+});
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('a user connected MAIN');
 
     // Listen for incoming messages
     socket.on('message', (data) => {
@@ -38,7 +52,7 @@ io.on('connection', (socket) => {
 
     // Listen for disconnection
     socket.on('disconnect', () => {
-        console.log('User disconnected from chat namespace.');
+        console.log('User disconnected from MAIN.');
     });
 
 
