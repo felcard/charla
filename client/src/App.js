@@ -1,53 +1,18 @@
 import './App.css';
-// import { Route, Routes } from 'react-router-dom';
-// import Main from './Main';
-// import Dos from './Dos';
 
-// function App() {
-
-//   return (
-//     <div id="main-chat">
-//       <Routes>
-//         <Route path='/' element={<Main />} />
-//         <Route path='/login' element={<Dos />} />
-//       </Routes>
-//     </div>
-//   );
-// }
-
-import io from "socket.io-client";
-import React, { useState, useEffect } from "react";
-
-const socket = io("socket-fel.koyeb.app/", {
-  transports: ["websocket", "xhr-polling"],
-});
+import React, { useState } from "react";
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
 
-  useEffect(() => {
-    // Listen for incoming messages
-    socket.on("message", (data) => {
-      setMessages((prevMessages) => [...prevMessages, data]);
-    });
-
-    // Clean up event listener when component unmounts
-    return () => {
-      socket.off("message");
-    };
-  }, []);
-
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const newMessage = { text: inputValue };
-    socket.emit("message", newMessage); // send the message to the server
+    setMessages([...messages, inputValue]);
     setInputValue("");
   };
+
 
   return (
     <div id="main-chat">
@@ -57,13 +22,13 @@ function App() {
           type="text"
           placeholder="Type your message here"
           value={inputValue}
-          onChange={handleInputChange}
+          onChange={(e) => setInputValue(e.target.value)}
         />
         <button type="submit">Send</button>
       </form>
       <ul>
         {messages.map((message, index) => (
-          <li key={index}>{message.text}</li>
+          <li key={index}>{message}</li>
         ))}
       </ul>
     </div>
