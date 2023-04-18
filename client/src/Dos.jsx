@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 
 const socket = io("socket-fel.koyeb.app/login", {
   transports: ["websocket", "xhr-polling"],
-  //auth: { token: "codigo" },
+  auth: { token: "codigo" },
 });
 
 export default function Dos() {
