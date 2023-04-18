@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import React, { useState, useEffect } from "react";
 
-const socket = io("https://socket-fel.koyeb.app", {
+const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
 });
 
@@ -21,10 +21,6 @@ export default function Main() {
     };
   }, []);
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const newMessage = { text: inputValue };
@@ -40,7 +36,7 @@ export default function Main() {
           type="text"
           placeholder="Type your message here"
           value={inputValue}
-          onChange={handleInputChange}
+          onChange={(e) => setInputValue(e.target.value)}
         />
         <button type="submit">Send</button>
       </form>
