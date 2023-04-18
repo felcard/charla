@@ -3,7 +3,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server, { cors: { origin: "https://beautiful-tarsier-8e762a.netlify.app" } });
+const io = new Server(server, { cors: { origin: "https://beautiful-tarsier-8e762a.netlify.app", credentials: true } });
 
 ///////////////////MONGO/////////////added second
 // const mongoose = require('mongoose');
