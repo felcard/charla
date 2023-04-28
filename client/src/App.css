@@ -2,22 +2,70 @@
   margin: 0px;
   padding: 0px;
 }
-.App {
-  text-align: center;
-}
-
-.App-link {
-  color: #61dafb;
-}
-#main-chat,
-#dos-chat {
+#main-chat {
   color: rgb(126, 23, 23);
   width: 100vw;
   height: 100vh;
+  background: rgb(26, 21, 2);
   text-align: center;
-  background: rgb(185, 172, 114);
 }
-#dos-chat {
-  color: goldenrod;
-  background: rgb(77, 117, 77);
+#main-forms {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+input {
+  font-family: space mono;
+  height: 1.5em;
+  color: rgb(151, 224, 200);
+  background: rgb(89, 9, 109);
+  outline: none;
+  border: solid 1px rgb(127, 63, 165);
+}
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: rgb(219, 65, 65);
+  opacity: 1; /* Firefox */
+  font-family: Space Mono;
+  font-size: 0.9em;
+}
+button {
+  color: #c5fb61;
+  background: rgb(63, 8, 8);
+  cursor: pointer;
+  border: solid 1px rgb(116, 65, 60);
+  outline: none;
+  margin-top: 0.2em;
+  padding: 0.2em;
+}
+
+.main-room {
+  position: relative;
+  animation: vanish 0.5s ease-in-out;
+  animation-fill-mode: forwards;
+}
+@keyframes vanish {
+  from {
+    top: 0px;
+  }
+  to {
+    top: -300px;
+  }
+}
+
+.expand {
+  animation: expand 0.5s ease-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0.5s;
+}
+@keyframes expand {
+  from {
+    text-align: center;
+    width: 164px;
+  }
+  to {
+    text-align: center;
+    width: 400px;
+    margin-left: calc(200px);
+  }
 }
