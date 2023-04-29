@@ -33,6 +33,7 @@ body {
   opacity: 1; /* Firefox */
   font-family: Space Mono;
   font-size: 0.9em;
+  padding-left: 0.2em;
 }
 button {
   color: #c5fb61;
@@ -58,12 +59,14 @@ button {
   }
 }
 input {
+  margin-bottom: 0.3em;
   font-family: space mono;
   height: 1.5em;
   color: rgb(151, 224, 200);
   background: rgb(36, 16, 41);
   outline: none;
   border: solid 1px rgb(127, 63, 165);
+  width: 20em;
 }
 .expand {
   animation: expand 0.3s ease-out;
@@ -78,6 +81,7 @@ input {
     border: none;
     text-align: center;
     width: 0px;
+    bottom: 10px;
   }
   to {
     position: fixed;
@@ -86,6 +90,11 @@ input {
     border: solid 1px rgb(127, 63, 165);
     text-align: left;
     width: 94vw;
+    height: 2em;
     bottom: 10px;
+    padding-left: 0.3em;
   }
+}
+
+@media screen and (max-aspect-ratio: 1/1) {
 }

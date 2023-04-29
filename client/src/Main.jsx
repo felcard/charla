@@ -25,9 +25,11 @@ const fonts = () => {
 };
 
 export default function Main() {
+  console.log(socket.id);
   const [roomTitle, setRoomTitle] = useState("MAIN ROOM");
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [inputName, setInputName] = useState("");
   const [inputRoom, setInputRoom] = useState("");
   const [inputCode, setInputCode] = useState("");
   const [animate, setAnimate] = useState(false);
@@ -59,11 +61,12 @@ export default function Main() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (filter.clean(inputValue).includes("*")) {
+    if (filter.clean(inputValue + inputName).includes("*")) {
       alert("Dont use that kind of language please!");
       setInputValue("");
+      setInputName("");
     } else {
-      socket.emit("message", inputValue);
+      socket.emit("message", `${inputName}: ${inputValue}`);
       setInputValue("");
     }
   };
@@ -76,6 +79,7 @@ export default function Main() {
       alert("Dont use that kind of language please!");
       setInputRoom("");
       setInputCode("");
+      setInputName("");
     } else {
       socket.emit("room", { name: inputRoom, code: inputCode });
       setRoomTitle(inputRoom);
@@ -94,15 +98,21 @@ export default function Main() {
           <form className={animate ? "main-room" : ""} onSubmit={handleRoom}>
             <input
               type="text"
-              placeholder="Enter room name"
+              placeholder="enter your name"
+              value={inputName}
+              onChange={(e) => setInputName(e.target.value)}
+            />
+            <br />
+            <input
+              type="text"
+              placeholder="enter a room name"
               value={inputRoom}
               onChange={(e) => setInputRoom(e.target.value)}
             />
             <br />
             <input
-              style={{ marginTop: "0.5em" }}
               type="text"
-              placeholder="room code"
+              placeholder="and a room code"
               value={inputCode}
               onChange={(e) => setInputCode(e.target.value)}
             />
@@ -129,7 +139,7 @@ export default function Main() {
           display: "flex",
           flexDirection: "column-reverse",
           alignItems: "flex-start",
-          height: "93vh",
+          height: "90vh",
           paddingLeft: "3vw",
         }}
       >
