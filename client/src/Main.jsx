@@ -5,7 +5,7 @@ import Filter from "bad-words";
 
 const filter = new Filter();
 
-const socket = io("socket-fel.koyeb.app/", {
+const socket = io("http://localhost:8000/", {
   transports: ["websocket", "xhr-polling"],
 });
 
@@ -25,7 +25,6 @@ const fonts = () => {
 };
 
 export default function Main() {
-  console.log(socket.id);
   const [roomTitle, setRoomTitle] = useState("MAIN ROOM");
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -61,10 +60,9 @@ export default function Main() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (filter.clean(inputValue + inputName).includes("*")) {
+    if (filter.clean(inputValue).includes("*")) {
       alert("Dont use that kind of language please!");
       setInputValue("");
-      setInputName("");
     } else {
       socket.emit("message", `${inputName}: ${inputValue}`);
       setInputValue("");
@@ -75,7 +73,8 @@ export default function Main() {
     event.preventDefault();
     const cleanRoom = filter.clean(inputRoom);
     const cleanCode = filter.clean(inputCode);
-    if ((cleanRoom + cleanCode).includes("*")) {
+    const cleanName = filter.clean(inputName);
+    if ((cleanRoom + " " + cleanCode + " " + cleanName).includes("*")) {
       alert("Dont use that kind of language please!");
       setInputRoom("");
       setInputCode("");
