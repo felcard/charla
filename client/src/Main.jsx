@@ -40,15 +40,15 @@ export default function Main() {
 
     socket.on("message", (data) => {
       setMessages((prevMessages) => {
-        console.log(data);
-        console.log(prevMessages);
+        // console.log(data);
+        // console.log(prevMessages);
         const cloudEl = {
           text: data,
           count: 5,
           font: fonts(),
           color: `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`,
         };
-        return [...prevMessages, cloudEl];
+        return [cloudEl, ...prevMessages];
       });
     });
 
@@ -87,55 +87,69 @@ export default function Main() {
 
   return (
     <div id="main-chat">
-      <h1 style={{ fontFamily: "nabla", fontSize: "3em" }}>{roomTitle}</h1>
-      <div id="main-forms">
-        <form style={{ marginRight: "1em" }} onSubmit={handleSubmit}>
-          <input
-            style={{ width: "0px", border: "none" }}
-            className={animate ? "expand" : ""}
-            type="text"
-            placeholder="Type your message here"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
+      <div id="nav">
+        <h1 style={{ fontFamily: "nabla", fontSize: "3em" }}>{roomTitle}</h1>
+        <div id="main-forms">
           <br />
-        </form>
-        <br />
-        <form className={animate ? "main-room" : ""} onSubmit={handleRoom}>
-          <input
-            type="text"
-            placeholder="Enter room name"
-            value={inputRoom}
-            onChange={(e) => setInputRoom(e.target.value)}
-          />
-          <br />
-          <input
-            style={{ marginTop: "0.5em" }}
-            type="text"
-            placeholder="room code"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-          />
-          <br />
-          <button type="submit">Submit</button>
-        </form>
+          <form className={animate ? "main-room" : ""} onSubmit={handleRoom}>
+            <input
+              type="text"
+              placeholder="Enter room name"
+              value={inputRoom}
+              onChange={(e) => setInputRoom(e.target.value)}
+            />
+            <br />
+            <input
+              style={{ marginTop: "0.5em" }}
+              type="text"
+              placeholder="room code"
+              value={inputCode}
+              onChange={(e) => setInputCode(e.target.value)}
+            />
+            <br />
+            <button type="submit">Submit</button>
+          </form>
+        </div>
       </div>
-      <ul>
+      <form style={{ marginRight: "1em" }} onSubmit={handleSubmit}>
+        <input
+          style={{ width: "0px", border: "none" }}
+          className={animate ? "expand" : ""}
+          type="text"
+          placeholder="Type your message here"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+        <br />
+      </form>
+      <div
+        style={{
+          overflowY: "auto",
+          scrollBehavior: "smooth",
+          display: "flex",
+          flexDirection: "column-reverse",
+          alignItems: "flex-start",
+          height: "93vh",
+          paddingLeft: "3vw",
+        }}
+      >
         {messages.map((msg, ind) => {
           return (
-            <li
+            <div
               style={{
                 fontFamily: msg.font,
+                lineHeight: "1em",
                 fontSize: "2em",
                 color: msg.color,
               }}
               key={ind}
             >
               {msg.text}
-            </li>
+            </div>
           );
         })}
-      </ul>
+      </div>
+
       {/* <Cloud words={messages} /> */}
     </div>
   );

@@ -2,10 +2,22 @@
   margin: 0px;
   padding: 0px;
 }
+body {
+  background: rgb(26, 21, 2);
+}
+#nav {
+  width: 100vw;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#nav h1 {
+  background: rgb(26, 21, 2);
+}
 #main-chat {
   color: rgb(126, 23, 23);
   width: 100vw;
-  height: 100%;
+  min-height: 100vh;
   background: rgb(26, 21, 2);
   text-align: center;
 }
@@ -14,14 +26,7 @@
   align-items: flex-start;
   justify-content: center;
 }
-input {
-  font-family: space mono;
-  height: 1.5em;
-  color: rgb(151, 224, 200);
-  background: rgb(56, 27, 63);
-  outline: none;
-  border: solid 1px rgb(127, 63, 165);
-}
+
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: rgb(161, 126, 50);
@@ -52,7 +57,14 @@ button {
     top: -300px;
   }
 }
-
+input {
+  font-family: space mono;
+  height: 1.5em;
+  color: rgb(151, 224, 200);
+  background: rgb(36, 16, 41);
+  outline: none;
+  border: solid 1px rgb(127, 63, 165);
+}
 .expand {
   animation: expand 0.3s ease-out;
   animation-fill-mode: forwards;
@@ -68,11 +80,12 @@ button {
     width: 0px;
   }
   to {
-    position: absolute;
+    position: fixed;
     left: 50%;
     transform: translateX(-50%);
     border: solid 1px rgb(127, 63, 165);
-    text-align: center;
-    width: 90vw;
+    text-align: left;
+    width: 94vw;
+    bottom: 10px;
   }
 }
