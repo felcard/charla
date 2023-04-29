@@ -18,30 +18,30 @@ input {
   font-family: space mono;
   height: 1.5em;
   color: rgb(151, 224, 200);
-  background: rgb(89, 9, 109);
+  background: rgb(56, 27, 63);
   outline: none;
   border: solid 1px rgb(127, 63, 165);
 }
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgb(219, 65, 65);
+  color: rgb(161, 126, 50);
   opacity: 1; /* Firefox */
   font-family: Space Mono;
   font-size: 0.9em;
 }
 button {
   color: #c5fb61;
-  background: rgb(63, 8, 8);
+  background: transparent;
   cursor: pointer;
-  border: solid 1px rgb(116, 65, 60);
+  border: solid 1px rgb(127, 63, 165);
   outline: none;
-  margin-top: 0.2em;
+  margin-top: 0.3em;
   padding: 0.2em;
 }
 
 .main-room {
   position: relative;
-  animation: vanish 0.5s ease-in-out;
+  animation: vanish 0.3s ease-in-out;
   animation-fill-mode: forwards;
 }
 @keyframes vanish {
@@ -54,16 +54,18 @@ button {
 }
 
 .expand {
-  animation: expand 0.5s ease-out;
+  animation: expand 0.3s ease-out;
   animation-fill-mode: forwards;
   animation-delay: 0.5s;
 }
 @keyframes expand {
   from {
+    border: none;
     text-align: center;
-    width: 164px;
+    width: 0px;
   }
   to {
+    border: solid 1px rgb(127, 63, 165);
     text-align: center;
     width: 400px;
     margin-left: calc(200px);

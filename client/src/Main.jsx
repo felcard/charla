@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 import React, { useState, useEffect } from "react";
-import Cloud from "./Cloud";
+//import Cloud from "./Cloud";
 import Filter from "bad-words";
 
 const filter = new Filter();
@@ -8,6 +8,21 @@ const filter = new Filter();
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
 });
+
+const fonts = () => {
+  const fontArr = [
+    "Rancho",
+    "Lakki Reddy",
+    "Righteous",
+    "Space Mono",
+    "Rancho",
+    "Lakki Reddy",
+    "Righteous",
+    "Space Mono",
+  ];
+  const fontInd = Math.floor(Math.random() * 7);
+  return fontArr[fontInd];
+};
 
 export default function Main() {
   const [roomTitle, setRoomTitle] = useState("MAIN ROOM");
@@ -27,7 +42,12 @@ export default function Main() {
       setMessages((prevMessages) => {
         console.log(data);
         console.log(prevMessages);
-        const cloudEl = { text: data, count: 5 };
+        const cloudEl = {
+          text: data,
+          count: 5,
+          font: fonts(),
+          color: `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`,
+        };
         return [...prevMessages, cloudEl];
       });
     });
@@ -71,7 +91,7 @@ export default function Main() {
       <div id="main-forms">
         <form style={{ marginRight: "1em" }} onSubmit={handleSubmit}>
           <input
-            style={{ width: "164px" }}
+            style={{ width: "0px", border: "none" }}
             className={animate ? "expand" : ""}
             type="text"
             placeholder="Type your message here"
@@ -100,8 +120,23 @@ export default function Main() {
           <button type="submit">Submit</button>
         </form>
       </div>
-
-      <Cloud words={messages} />
+      <ul>
+        {messages.map((msg, ind) => {
+          return (
+            <li
+              style={{
+                fontFamily: msg.font,
+                fontSize: "2em",
+                color: msg.color,
+              }}
+              key={ind}
+            >
+              {msg.text}
+            </li>
+          );
+        })}
+      </ul>
+      {/* <Cloud words={messages} /> */}
     </div>
   );
 }
