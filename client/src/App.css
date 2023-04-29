@@ -60,14 +60,19 @@ button {
 }
 @keyframes expand {
   from {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     border: none;
     text-align: center;
     width: 0px;
   }
   to {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     border: solid 1px rgb(127, 63, 165);
     text-align: center;
-    width: 400px;
-    margin-left: calc(200px);
+    width: 90vw;
   }
 }
