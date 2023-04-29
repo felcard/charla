@@ -9,23 +9,31 @@ io.on('connection', (socket) => {
     console.log('a user connected MAIN');
 
     socket.on('room', room => {
-        if (!io.sockets.adapter.rooms.has(room)) {
-            socket.emit('room', `I will join you on ${room.name}`);
+        if (!io.sockets.adapter.rooms.has(room.name)) {
+            socket.emit('room', `room created: ${room.name}`);
             socket.join(room.name);
-            socket.emit('joined', 'JOINED');
+            socket.emit('joined', 'joined room');
             const roomData = io.sockets.adapter.rooms.get(room.name);
             roomData.data = room;
+            socket.on('message', (data) => {
+                console.log('Message received:', data);
+                io.to(room.name).emit('message', data);
+            });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
-            if (room.code === roomData.data.code)
+            if (room.code === roomData.data.code) {
                 console.log('otherUSer');
-            socket.join(roomData.data.name);
-            console.log(room);
+                socket.join(roomData.data.name);
+                console.log(`other user joined ${room.name}`);
+                socket.on('message', (data) => {
+                    console.log('Message received:', data);
+                    io.to(room.name).emit('message', data);
+                });
+            } else {
+                socket.emit('room', 'ROOM TAKEN');
+            }
         }
-        socket.on('message', (data) => {
-            console.log('Message received:', data);
-            io.to(room.name).emit('message', data);
-        });
+
     });
 
     // Listen for disconnection
