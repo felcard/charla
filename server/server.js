@@ -9,6 +9,7 @@ io.on('connection', (socket) => {
     console.log('a user connected MAIN');
 
     socket.on('room', room => {
+        console.log(room);
         if (!io.sockets.adapter.rooms.has(room.name)) {
             socket.emit('room', `room created: ${room.name}`);
             socket.join(room.name);
@@ -17,7 +18,7 @@ io.on('connection', (socket) => {
             roomData.data = room;
             socket.on('message', (data) => {
                 console.log('Message received:', data);
-                io.to(room.name).emit('message', data);
+                io.to(room.name).emit('message', { msg: data, user: room.user });
             });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
@@ -27,7 +28,7 @@ io.on('connection', (socket) => {
                 console.log(`other user joined ${room.name}`);
                 socket.on('message', (data) => {
                     console.log('Message received:', data);
-                    io.to(room.name).emit('message', data);
+                    io.to(room.name).emit('message', { msg: data, user: room.user });
                 });
             } else {
                 socket.emit('room', 'ROOM TAKEN');
