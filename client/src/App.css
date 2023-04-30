@@ -14,6 +14,16 @@ body {
 #nav h1 {
   background: rgb(26, 21, 2);
 }
+#nav input {
+  height: 1.5em;
+  font-size: 1.5em;
+  width: 30vw;
+}
+button {
+  font-size: 1.5em;
+  padding: 0.1em 0.3em;
+  font-family: space mono;
+}
 #main-chat {
   color: rgb(126, 23, 23);
   width: 100vw;
@@ -29,10 +39,10 @@ body {
 
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgb(161, 126, 50);
+  color: rgb(105, 90, 55);
   opacity: 1; /* Firefox */
   font-family: Space Mono;
-  font-size: 0.9em;
+  font-size: 1em;
   padding-left: 0.2em;
 }
 button {
@@ -47,7 +57,7 @@ button {
 
 .main-room {
   position: relative;
-  animation: vanish 0.3s ease-in-out;
+  animation: vanish 0.5s ease-in-out;
   animation-fill-mode: forwards;
 }
 @keyframes vanish {
@@ -56,6 +66,7 @@ button {
   }
   to {
     top: -300px;
+    visibility: hidden;
   }
 }
 input {
@@ -97,4 +108,9 @@ input {
 }
 
 @media screen and (max-aspect-ratio: 1/1) {
+  #nav input {
+    height: 2em;
+    font-size: 1.5em;
+    width: 95vw;
+  }
 }

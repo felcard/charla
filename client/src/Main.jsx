@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Filter from "bad-words";
 
 const filter = new Filter();
-
-const socket = io("socket-fel.koyeb.app/", {
+//socket-fel.koyeb.app/
+const socket = io("http://localhost:8000/", {
   transports: ["websocket", "xhr-polling"],
 });
 
@@ -22,6 +22,10 @@ const fonts = () => {
   ];
   const fontInd = Math.floor(Math.random() * 7);
   return fontArr[fontInd];
+};
+
+const color = () => {
+  return `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`;
 };
 
 export default function Main() {
@@ -44,10 +48,12 @@ export default function Main() {
         // console.log(data);
         // console.log(prevMessages);
         const cloudEl = {
-          text: data,
+          text: data.msg,
+          user: data.user,
           count: 5,
           font: fonts(),
-          color: `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`,
+          msgColor: color(),
+          userColor: color(),
         };
         return [cloudEl, ...prevMessages];
       });
@@ -58,18 +64,18 @@ export default function Main() {
     };
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleMsgSubmit = (event) => {
     event.preventDefault();
     if (filter.clean(inputValue).includes("*")) {
       alert("Dont use that kind of language please!");
       setInputValue("");
     } else {
-      socket.emit("message", `${inputName}: ${inputValue}`);
+      socket.emit("message", inputValue);
       setInputValue("");
     }
   };
 
-  const handleRoom = (event) => {
+  const handleRoomSubmit = (event) => {
     event.preventDefault();
     const cleanRoom = filter.clean(inputRoom);
     const cleanCode = filter.clean(inputCode);
@@ -80,7 +86,11 @@ export default function Main() {
       setInputCode("");
       setInputName("");
     } else {
-      socket.emit("room", { name: inputRoom, code: inputCode });
+      socket.emit("room", {
+        user: inputName,
+        name: inputRoom,
+        code: inputCode,
+      });
       setRoomTitle(inputRoom);
       setInputRoom("");
       setInputCode("");
@@ -94,7 +104,10 @@ export default function Main() {
         <h1 style={{ fontFamily: "nabla", fontSize: "3em" }}>{roomTitle}</h1>
         <div id="main-forms">
           <br />
-          <form className={animate ? "main-room" : ""} onSubmit={handleRoom}>
+          <form
+            className={animate ? "main-room" : ""}
+            onSubmit={handleRoomSubmit}
+          >
             <input
               type="text"
               placeholder="enter your name"
@@ -120,7 +133,7 @@ export default function Main() {
           </form>
         </div>
       </div>
-      <form style={{ marginRight: "1em" }} onSubmit={handleSubmit}>
+      <form style={{ marginRight: "1em" }} onSubmit={handleMsgSubmit}>
         <input
           style={{ width: "0px", border: "none" }}
           className={animate ? "expand" : ""}
@@ -149,11 +162,11 @@ export default function Main() {
                 fontFamily: msg.font,
                 lineHeight: "1em",
                 fontSize: "2em",
-                color: msg.color,
               }}
               key={ind}
             >
-              {msg.text}
+              <span style={{ color: msg.userColor }}>{msg.user}: </span>
+              <span style={{ color: msg.msgColor }}>{msg.text}</span>
             </div>
           );
         })}
