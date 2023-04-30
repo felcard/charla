@@ -5,7 +5,7 @@ import Filter from "bad-words";
 
 const filter = new Filter();
 //socket-fel.koyeb.app/
-const socket = io("http://localhost:8000/", {
+const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
 });
 
