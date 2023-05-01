@@ -2,37 +2,35 @@
   margin: 0px;
   padding: 0px;
 }
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
   display: none;
-} */
+}
 body {
   background: rgb(26, 21, 2);
-}
-#nav {
-  width: 100vw;
-  /* position: fixed;
-  left: 50%;
-  transform: translateX(-50%); */
-}
-#nav h1 {
-  background: rgb(26, 21, 2);
-}
-#nav input {
-  height: 1.5em;
-  font-size: 1.5em;
-  width: 30vw;
 }
 #cont {
   color: rgb(126, 23, 23);
   width: 100vw;
-  min-height: 100vh;
   background: rgb(26, 21, 2);
   text-align: center;
 }
-.main-forms {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+#nav {
+  width: 100vw;
+  position: fixed;
+  top: 0px;
+  /* center nav with left and transform */
+  left: 50%;
+  transform: translateX(-50%);
+}
+#nav h1 {
+  background: rgb(26, 21, 2);
+  font-family: "nabla";
+  font-size: 3em;
+}
+#nav input {
+  height: 2em;
+  font-size: 1.5em;
+  width: 30vw;
 }
 
 ::placeholder {
@@ -56,19 +54,35 @@ button {
   font-family: space mono;
 }
 
+.room-form-start {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .main-room {
+  position: relative;
   animation: vanish 0.5s ease-in-out;
   animation-fill-mode: forwards;
 }
 @keyframes vanish {
   from {
+    top: 0px;
   }
   to {
-    margin-top: -300px;
+    top: -300px;
   }
 }
-.disappear {
+.room-form-disappear {
   display: none;
+}
+#chat-messages {
+  overflow-y: "auto";
+  scroll-behavior: "smooth";
+  display: "flex";
+  flex-direction: "column-reverse";
+  align-items: "flex-start";
+  padding-left: "3vw";
 }
 input {
   margin-bottom: 0.3em;
@@ -78,32 +92,48 @@ input {
   background: rgb(36, 16, 41);
   outline: none;
   border: solid 1px rgb(127, 63, 165);
+  width: 20em;
 }
 .expand {
   animation: expand 0.3s ease-out;
   animation-fill-mode: forwards;
   animation-delay: 0.5s;
 }
+.expand input {
+  font-family: space mono;
+  height: 100%;
+  color: rgb(151, 224, 200);
+  outline: none;
+  border: none;
+  width: 100%;
+}
 @keyframes expand {
   from {
-    /* position: fixed;
+    position: fixed;
     left: 50%;
-    transform: translateX(-50%); */
+    transform: translateX(-50%);
     border: none;
     text-align: left;
     width: 0px;
+    bottom: 0px;
+    margin-bottom: 10px;
   }
   to {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
     border: solid 1px rgb(127, 63, 165);
     text-align: left;
     width: 94vw;
     font-size: 1.3em;
+    bottom: 0px;
+    margin-bottom: 10px;
+    background: rgb(36, 16, 41);
+    visibility: visible;
   }
 }
-
 @media screen and (max-aspect-ratio: 1/1) {
   #nav input {
-    height: 2em;
     font-size: 1.5em;
     width: 95vw;
   }

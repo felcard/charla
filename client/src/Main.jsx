@@ -27,17 +27,19 @@ const color = () => {
 };
 
 export default function Main() {
-  const [roomTitle, setRoomTitle] = useState("MAIN ROOM");
+  const [roomTitle, setRoomTitle] = useState("CLEAN CHAT");
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [inputName, setInputName] = useState("");
   const [inputRoom, setInputRoom] = useState("");
   const [inputCode, setInputCode] = useState("");
-  const [animate, setAnimate] = useState("main-forms");
-
+  const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
+  const [finalSize, setFinalSize] = useState(0);
+  //for calculating the size of the messages area
   const h1Ref = useRef(null);
   const chatRef = useRef(null);
-  const inputFocus = useRef(null);
+  //focus cursor on chant input box
+  const inFocusRef = useRef(null);
 
   useEffect(() => {
     socket.on("room", (msg) => {
@@ -47,15 +49,14 @@ export default function Main() {
 
     socket.on("message", (data) => {
       setMessages((prevMessages) => {
-        const cloudEl = {
+        const socketMsg = {
           text: data.msg,
           user: data.user,
-          count: 5,
           font: fonts(),
           msgColor: color(),
           userColor: color(),
         };
-        return [cloudEl, ...prevMessages];
+        return [socketMsg, ...prevMessages];
       });
     });
 
@@ -71,7 +72,7 @@ export default function Main() {
       alert("Dont use that kind of language please! - No diga grocerias!");
       setInputValue("");
     } else {
-      socket.emit("message", inputValue);
+      socket.emit("message", inputValue.trim());
       setInputValue("");
     }
   };
@@ -88,37 +89,40 @@ export default function Main() {
       setInputName("");
     } else {
       socket.emit("room", {
-        user: inputName,
-        name: inputRoom,
-        code: inputCode,
+        user: inputName.trim(),
+        name: inputRoom.trim(),
+        code: inputCode.trim(),
       });
       setRoomTitle(inputRoom);
       setInputRoom("");
       setInputCode("");
-      setAnimate("main-room");
+      setRoomFormAnimate("main-room");
     }
   };
-  let size;
-  if (animate === "disappear") {
-    size =
-      window.innerHeight -
-      h1Ref.current?.clientHeight -
-      chatRef.current?.clientHeight -
-      5;
-  }
 
+  //expandEnd listens for the end of the final animation so the elements ar
+  //all in place and we can calculate their sizes correctly
+  const expandEnd = () => {
+    //add a bit of difference to allow separation from the
+    //messages area and the input chat box with 0.02 of screen height
+    setFinalSize(
+      window.innerHeight -
+        h1Ref.current?.clientHeight -
+        chatRef.current?.clientHeight -
+        window.innerHeight * 0.02
+    );
+    inFocusRef.current.focus();
+  };
   return (
     <div id="cont">
-      <div id="nav">
-        <h1 ref={h1Ref} style={{ fontFamily: "nabla", fontSize: "3em" }}>
-          {roomTitle}
-        </h1>
+      <div ref={h1Ref} id="nav">
+        <h1>{roomTitle}</h1>
         <div
-          className={animate}
-          onAnimationEnd={() => setAnimate("disappear")}
+          id="room-form"
+          className={roomFormAnimate}
+          onAnimationEnd={() => setRoomFormAnimate("room-form-disappear")}
           onSubmit={handleRoomSubmit}
         >
-          <br />
           <form>
             <input
               type="text"
@@ -141,20 +145,23 @@ export default function Main() {
               onChange={(e) => setInputCode(e.target.value)}
             />
             <br />
-            <button type="submit">Submit</button>
+            <button type="submit">CREATE</button>
           </form>
         </div>
       </div>
 
       <div
-        id="chat"
+        id="chat-messages"
         style={{
+          //marginTop of the size og title element
+          marginTop: h1Ref.current?.clientHeight,
           overflowY: "auto",
           scrollBehavior: "smooth",
           display: "flex",
           flexDirection: "column-reverse",
           alignItems: "flex-start",
-          height: size ? size : "0",
+          //and the height calculated at the end of aminmations
+          height: finalSize,
           paddingLeft: "3vw",
         }}
       >
@@ -165,31 +172,43 @@ export default function Main() {
                 fontFamily: msg.font,
                 lineHeight: "1em",
                 fontSize: "2em",
+                textAlign: "left",
               }}
               key={ind}
             >
               <span style={{ color: msg.userColor }}>{msg.user}: </span>
-              <span style={{ color: msg.msgColor }}>{msg.text}</span>
+              <br />
+              <span style={{ color: "green" }}>{msg.text}</span>
             </div>
           );
         })}
       </div>
-      <form ref={chatRef} style={{ width: "100vw" }} onSubmit={handleMsgSubmit}>
+      <form
+        id="chat-input-form"
+        ref={chatRef}
+        style={{
+          visibility: "hidden",
+          border: "solid 1px transparent",
+          width: "calc(100vw-2px)",
+          fontSize: "1.3em",
+        }}
+        className={roomFormAnimate === "room-form-start" ? "" : "expand"}
+        onAnimationEnd={expandEnd}
+        onSubmit={handleMsgSubmit}
+      >
         <input
-          ref={inputFocus}
-          style={{
-            width: "0px",
-            border: "solid 1px transparent",
-            fontSize: "1.3em",
-          }}
-          className={animate === "main-forms" ? "" : "expand"}
-          //onAnimationEnd={() => inputFocus.current.focus()}
+          ref={inFocusRef}
+          // style={{
+          //   width: "0px",
+          //   border: "solid 1px transparent",
+          //   fontSize: "1.3em",
+          // }}
+          //className={roomFormAnimate === "room-form-start" ? "" : "expand"}
           type="text"
           placeholder="Type your message here"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
         />
-        <br />
       </form>
     </div>
   );
