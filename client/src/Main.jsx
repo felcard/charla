@@ -1,9 +1,7 @@
 import io from "socket.io-client";
-import React, { useState, useEffect } from "react";
-//import Cloud from "./Cloud";
-import Filter from "bad-words";
+import React, { useState, useEffect, useRef } from "react";
+import { bad } from "./rude";
 
-const filter = new Filter();
 //socket-fel.koyeb.app/
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
@@ -35,7 +33,11 @@ export default function Main() {
   const [inputName, setInputName] = useState("");
   const [inputRoom, setInputRoom] = useState("");
   const [inputCode, setInputCode] = useState("");
-  const [animate, setAnimate] = useState(false);
+  const [animate, setAnimate] = useState("main-forms");
+
+  const h1Ref = useRef(null);
+  const chatRef = useRef(null);
+  const inputFocus = useRef(null);
 
   useEffect(() => {
     socket.on("room", (msg) => {
@@ -45,8 +47,6 @@ export default function Main() {
 
     socket.on("message", (data) => {
       setMessages((prevMessages) => {
-        // console.log(data);
-        // console.log(prevMessages);
         const cloudEl = {
           text: data.msg,
           user: data.user,
@@ -66,8 +66,9 @@ export default function Main() {
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
-    if (filter.clean(inputValue).includes("*")) {
-      alert("Dont use that kind of language please!");
+    const profane = bad.filter((word) => inputValue.includes(word));
+    if (profane.length) {
+      alert("Dont use that kind of language please! - No diga grocerias!");
       setInputValue("");
     } else {
       socket.emit("message", inputValue);
@@ -77,11 +78,11 @@ export default function Main() {
 
   const handleRoomSubmit = (event) => {
     event.preventDefault();
-    const cleanRoom = filter.clean(inputRoom);
-    const cleanCode = filter.clean(inputCode);
-    const cleanName = filter.clean(inputName);
-    if ((cleanRoom + " " + cleanCode + " " + cleanName).includes("*")) {
-      alert("Dont use that kind of language please!");
+    const profane = bad.filter((word) =>
+      [inputRoom, inputCode, inputName].includes(word)
+    );
+    if (profane.length) {
+      alert("Dont use that kind of language please! - No diga grocerias!");
       setInputRoom("");
       setInputCode("");
       setInputName("");
@@ -94,20 +95,31 @@ export default function Main() {
       setRoomTitle(inputRoom);
       setInputRoom("");
       setInputCode("");
-      setAnimate(true);
+      setAnimate("main-room");
     }
   };
+  let size;
+  if (animate === "disappear") {
+    size =
+      window.innerHeight -
+      h1Ref.current?.clientHeight -
+      chatRef.current?.clientHeight -
+      5;
+  }
 
   return (
-    <div id="main-chat">
+    <div id="cont">
       <div id="nav">
-        <h1 style={{ fontFamily: "nabla", fontSize: "3em" }}>{roomTitle}</h1>
-        <div id="main-forms">
+        <h1 ref={h1Ref} style={{ fontFamily: "nabla", fontSize: "3em" }}>
+          {roomTitle}
+        </h1>
+        <div
+          className={animate}
+          onAnimationEnd={() => setAnimate("disappear")}
+          onSubmit={handleRoomSubmit}
+        >
           <br />
-          <form
-            className={animate ? "main-room" : ""}
-            onSubmit={handleRoomSubmit}
-          >
+          <form>
             <input
               type="text"
               placeholder="enter your name"
@@ -133,25 +145,16 @@ export default function Main() {
           </form>
         </div>
       </div>
-      <form style={{ marginRight: "1em" }} onSubmit={handleMsgSubmit}>
-        <input
-          style={{ width: "0px", border: "none" }}
-          className={animate ? "expand" : ""}
-          type="text"
-          placeholder="Type your message here"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        <br />
-      </form>
+
       <div
+        id="chat"
         style={{
           overflowY: "auto",
           scrollBehavior: "smooth",
           display: "flex",
           flexDirection: "column-reverse",
           alignItems: "flex-start",
-          height: "90vh",
+          height: size ? size : "0",
           paddingLeft: "3vw",
         }}
       >
@@ -171,8 +174,23 @@ export default function Main() {
           );
         })}
       </div>
-
-      {/* <Cloud words={messages} /> */}
+      <form ref={chatRef} style={{ width: "100vw" }} onSubmit={handleMsgSubmit}>
+        <input
+          ref={inputFocus}
+          style={{
+            width: "0px",
+            border: "solid 1px transparent",
+            fontSize: "1.3em",
+          }}
+          className={animate === "main-forms" ? "" : "expand"}
+          onAnimationEnd={() => inputFocus.current.focus()}
+          type="text"
+          placeholder="Type your message here"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+        <br />
+      </form>
     </div>
   );
 }
