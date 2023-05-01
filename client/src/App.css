@@ -23,6 +23,11 @@ body {
   transform: translateX(-50%);
 }
 #nav h1 {
+  width: 98vw;
+  position: fixed;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgb(26, 21, 2);
   font-family: "nabla";
   font-size: 3em;
@@ -35,7 +40,7 @@ body {
 
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgb(85, 70, 41);
+  color: rgb(114, 255, 121);
   opacity: 1; /* Firefox */
   font-family: Space Mono;
   font-size: 1em;
@@ -43,15 +48,19 @@ body {
   text-align: center;
 }
 button {
-  color: #c5fb61;
+  color: #58ff74;
   background: transparent;
   cursor: pointer;
   border: solid 1px rgb(127, 63, 165);
   outline: none;
-  margin-top: 0.3em;
+  margin-top: 2em;
   padding: 0.1em 0.3em;
   font-size: 1.5em;
   font-family: space mono;
+}
+#room-form {
+  margin-top: 50vh;
+  transform: translateY(-50%);
 }
 
 .room-form-start {
@@ -70,7 +79,7 @@ button {
     top: 0px;
   }
   to {
-    top: -300px;
+    top: -600px;
   }
 }
 .room-form-disappear {
@@ -95,7 +104,7 @@ input {
   width: 20em;
 }
 .expand {
-  animation: expand 0.3s ease-out;
+  animation: expand 0.5s ease-out;
   animation-fill-mode: forwards;
   animation-delay: 0.5s;
 }
@@ -106,6 +115,9 @@ input {
   outline: none;
   border: none;
   width: 100%;
+  font-size: 0.8em;
+  margin: 0px;
+  height: 1.5em;
 }
 @keyframes expand {
   from {
@@ -125,7 +137,6 @@ input {
     border: solid 1px rgb(127, 63, 165);
     text-align: left;
     width: 94vw;
-    font-size: 1.3em;
     bottom: 0px;
     margin-bottom: 10px;
     background: rgb(36, 16, 41);

@@ -67,7 +67,9 @@ export default function Main() {
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
-    const profane = bad.filter((word) => inputValue.includes(word));
+    const profane = bad.filter((word) =>
+      word.includes(inputValue.toLowerCase())
+    );
     if (profane.length) {
       alert("Dont use that kind of language please! - No diga grocerias!");
       setInputValue("");
@@ -115,8 +117,8 @@ export default function Main() {
   };
   return (
     <div id="cont">
-      <div ref={h1Ref} id="nav">
-        <h1>{roomTitle}</h1>
+      <div id="nav">
+        <h1 ref={h1Ref}>{roomTitle}</h1>
         <div
           id="room-form"
           className={roomFormAnimate}
@@ -178,7 +180,7 @@ export default function Main() {
             >
               <span style={{ color: msg.userColor }}>{msg.user}: </span>
               <br />
-              <span style={{ color: "green" }}>{msg.text}</span>
+              <span style={{ color: msg.msgColor }}>{msg.text}</span>
             </div>
           );
         })}
