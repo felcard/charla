@@ -183,7 +183,7 @@ export default function Main() {
             fontSize: "1.3em",
           }}
           className={animate === "main-forms" ? "" : "expand"}
-          onAnimationEnd={() => inputFocus.current.focus()}
+          //onAnimationEnd={() => inputFocus.current.focus()}
           type="text"
           placeholder="Type your message here"
           value={inputValue}
