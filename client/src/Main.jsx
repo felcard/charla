@@ -26,6 +26,18 @@ const color = () => {
   return `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`;
 };
 
+const isRude = (rudeWords, userInput) => {
+  const rudeArr = rudeWords.split(",");
+  const inputArr = userInput.split(" ");
+  let result;
+  rudeArr.forEach((word) => {
+    inputArr.forEach((badWord) => {
+      if (badWord === word) result = true;
+    });
+  });
+  return result;
+};
+
 export default function Main() {
   const [roomTitle, setRoomTitle] = useState("CLEAN CHAT");
   const [messages, setMessages] = useState([]);
@@ -48,56 +60,69 @@ export default function Main() {
     });
 
     socket.on("message", (data) => {
+      const userGone = data.msg === "k@t@n@";
       setMessages((prevMessages) => {
         const socketMsg = {
-          text: data.msg,
+          text: userGone ? "🏃💨🏃💨🏃💨LEFT THE ROOM🏃💨🏃💨🏃💨" : data.msg,
           user: data.user,
-          font: fonts(),
-          msgColor: color(),
-          userColor: color(),
+          font: userGone ? "Space Mono" : fonts(),
+          msgColor: userGone ? "red" : color(),
+          userColor: userGone ? "red" : color(),
         };
         return [socketMsg, ...prevMessages];
       });
     });
-
     return () => {
+      socket.off("room");
       socket.off("message");
+      socket.disconnect();
     };
   }, []);
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
-    const profane = bad.filter((word) =>
-      word.includes(inputValue.toLowerCase())
-    );
-    if (profane.length) {
+    const trimmed = inputValue.trim();
+    if (isRude(bad, trimmed)) {
       alert("Dont use that kind of language please! - No diga grocerias!");
       setInputValue("");
     } else {
-      socket.emit("message", inputValue.trim());
+      //after period of inactivity
+      if (!socket.connected) {
+        console.log("RE-CONNECTED");
+        socket.connect();
+        socket.emit("room", {
+          user: inputName.trim(),
+          name: inputRoom.trim(),
+          code: inputCode.trim(),
+        });
+      }
+      socket.emit("message", trimmed);
       setInputValue("");
     }
   };
 
   const handleRoomSubmit = (event) => {
     event.preventDefault();
-    const profane = bad.filter((word) =>
-      [inputRoom, inputCode, inputName].includes(word)
-    );
-    if (profane.length) {
+    const totValues = inputName + " " + inputRoom + " " + inputCode;
+    if (isRude(bad, totValues)) {
       alert("Dont use that kind of language please! - No diga grocerias!");
       setInputRoom("");
       setInputCode("");
       setInputName("");
     } else {
-      socket.emit("room", {
-        user: inputName.trim(),
-        name: inputRoom.trim(),
-        code: inputCode.trim(),
-      });
+      if (socket.connected) {
+        //we conditionally emit events if the socket is not connected
+        //since if it is not connected the events will still be buffered
+        //and will add up to the events being emitted in the hanleMsgSubmit function that deals with re-connection after period of inactivity creating to connections and broadcasting double events.
+        socket.emit("room", {
+          user: inputName.trim(),
+          name: inputRoom.trim(),
+          code: inputCode.trim(),
+        });
+      }
       setRoomTitle(inputRoom);
-      setInputRoom("");
-      setInputCode("");
+      // setInputRoom("");
+      // setInputCode("");
       setRoomFormAnimate("main-room");
     }
   };
@@ -147,7 +172,7 @@ export default function Main() {
               onChange={(e) => setInputCode(e.target.value)}
             />
             <br />
-            <button type="submit">CREATE</button>
+            <button type="submit">JOIN</button>
           </form>
         </div>
       </div>
@@ -191,6 +216,10 @@ export default function Main() {
         style={{
           visibility: "hidden",
           border: "solid 1px transparent",
+          //we take 2px off the width to account for borders since
+          //100vw on its own does not include borders so if we set
+          //the width of an element to 100vw and also add borders then the
+          //elemnt's width will overflow!!
           width: "calc(100vw-2px)",
           fontSize: "1.3em",
         }}
