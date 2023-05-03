@@ -105,7 +105,7 @@ export default function Main() {
     event.preventDefault();
     const totValues = inputName + " " + inputRoom + " " + inputCode;
     if (isRude(bad, totValues)) {
-      alert("Dont use that kind of language please! - No diga grocerias!");
+      alert("Dont use that kind of language please! - No diga groserias!");
       setInputRoom("");
       setInputCode("");
       setInputName("");
