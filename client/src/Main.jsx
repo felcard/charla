@@ -63,7 +63,7 @@ export default function Main() {
       const userGone = data.msg === "k@t@n@";
       setMessages((prevMessages) => {
         const socketMsg = {
-          text: userGone ? "🏃💨🏃💨🏃💨LEFT THE ROOM🏃💨🏃💨🏃💨" : data.msg,
+          text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
           user: data.user,
           font: userGone ? "Space Mono" : fonts(),
           msgColor: userGone ? "red" : color(),
