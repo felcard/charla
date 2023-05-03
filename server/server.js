@@ -2,7 +2,7 @@ const http = require('http');
 const server = http.createServer();
 const { Server } = require("socket.io");
 const io = new Server(server, {
-    cors: { origin: "https://wordiness.netlify.app/", credentials: true },
+    cors: { origin: "https://cleanchat.netlify.app/", credentials: true },
     //pingInterval: 30000,
     //pingTimeout: 120000,
 });
