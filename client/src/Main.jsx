@@ -198,6 +198,7 @@ export default function Main() {
               style={{
                 fontFamily: msg.font,
                 lineHeight: "1em",
+                fontSize: "2em",
                 textAlign: "left",
                 textShadow: `${
                   msg.msgColor === "magenta" ? "0px 0px 10px magenta" : ""
