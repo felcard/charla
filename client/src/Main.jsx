@@ -32,7 +32,7 @@ const isRude = (rudeWords, userInput) => {
   let result;
   rudeArr.forEach((word) => {
     inputArr.forEach((badWord) => {
-      if (badWord === word) result = true;
+      if (badWord.toLowerCase() === word) result = true;
     });
   });
   return result;
