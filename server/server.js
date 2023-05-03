@@ -27,7 +27,7 @@ io.on('connection', (socket) => {
             if (room.code === roomData.data.code) {
                 socket.join(roomData.data.name);
                 console.log(`user: ${socket.id} joined room`);
-                io.to(room.name).emit('message', { msg: '👋👋👋👋 IS IN THE ROOM 👋👋👋👋', user: room.user });
+                io.to(room.name).emit('message', { msg: ' IS IN THE ROOM 👋', user: room.user });
                 socket.on('message', (data) => {
                     console.log(`user: ${socket.id} sent a message`);
                     io.to(room.name).emit('message', { msg: data, user: room.user });
