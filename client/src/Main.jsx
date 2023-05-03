@@ -238,6 +238,7 @@ export default function Main() {
           type="text"
           placeholder="Type your message here"
           value={inputValue}
+          autoComplete="off"
           onChange={(e) => setInputValue(e.target.value)}
         />
       </form>
