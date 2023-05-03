@@ -66,8 +66,8 @@ export default function Main() {
           text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
           user: data.user,
           font: userGone ? "Space Mono" : fonts(),
-          msgColor: userGone ? "red" : color(),
-          userColor: userGone ? "red" : color(),
+          msgColor: userGone ? "magenta" : color(),
+          userColor: userGone ? "magenta" : color(),
         };
         return [socketMsg, ...prevMessages];
       });
@@ -198,8 +198,10 @@ export default function Main() {
               style={{
                 fontFamily: msg.font,
                 lineHeight: "1em",
-                fontSize: "2em",
                 textAlign: "left",
+                textShadow: `${
+                  msg.msgColor === "magenta" ? "0px 0px 10px magenta" : ""
+                }`,
               }}
               key={ind}
             >
