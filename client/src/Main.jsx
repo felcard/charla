@@ -43,9 +43,12 @@ export default function Main() {
         socket.on("joined", (msg) => console.log(msg));
       });
       socket.on("message", (data) => {
-        if (notification === "granted" && data?.user !== sessionRoom.user) {
-          audio.play();
+        if (typeof data.user !== "undefined") {
+          if (notification === "granted" && sessionRoom.user !== data.user) {
+            audio.play();
+          }
         }
+
         //if server sends keyword in a message means the user left
         const userGone = data.msg === "k@t@n@";
         setMessages((prevMessages) => {
@@ -106,7 +109,6 @@ export default function Main() {
       });
       setPlugged(true);
     }
-
     event.preventDefault();
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
