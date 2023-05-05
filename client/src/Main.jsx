@@ -43,7 +43,10 @@ export default function Main() {
         socket.on("joined", (msg) => console.log(msg));
       });
       socket.on("message", (data) => {
-        if (typeof data.user !== "undefined") {
+        if (
+          typeof data?.user !== "undefined" &&
+          typeof sessionRoom?.user !== "undefined"
+        ) {
           if (notification === "granted" && sessionRoom.user !== data.user) {
             audio.play();
           }
