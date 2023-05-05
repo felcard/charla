@@ -43,7 +43,7 @@ export default function Main() {
         socket.on("joined", (msg) => console.log(msg));
       });
       socket.on("message", (data) => {
-        if (notification === "granted" && data.user !== sessionRoom.user) {
+        if (notification === "granted" && data?.user !== sessionRoom.user) {
           audio.play();
         }
         //if server sends keyword in a message means the user left
