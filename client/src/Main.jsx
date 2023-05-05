@@ -1,45 +1,16 @@
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef } from "react";
-import { bad } from "./rude";
-
+import { fonts, color, isRude } from "./tools/fx";
+import { bad } from "./tools/rude";
+import soundFile from "./ring.mp3";
+const audio = new Audio(soundFile);
 //socket-fel.koyeb.app/
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
-});
-
-const fonts = () => {
-  const fontArr = [
-    "Rancho",
-    "Lakki Reddy",
-    "Righteous",
-    "Space Mono",
-    "Rancho",
-    "Lakki Reddy",
-    "Righteous",
-    "Space Mono",
-  ];
-  const fontInd = Math.floor(Math.random() * 7);
-  return fontArr[fontInd];
-};
-
-const color = () => {
-  return `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`;
-};
-
-const isRude = (rudeWords, userInput) => {
-  const rudeArr = rudeWords.split(",");
-  const inputArr = userInput.split(" ");
-  let result;
-  rudeArr.forEach((word) => {
-    inputArr.forEach((badWord) => {
-      if (badWord.toLowerCase() === word) result = true;
-    });
-  });
-  return result;
-};
+}); //io() initiates socket connection. But connection is async so to get socket.id needs to be done inside socket.on('connect',()=>console.log(socket.id))
 
 export default function Main() {
-  const [roomTitle, setRoomTitle] = useState("CLEAN CHAT");
+  const [roomTitle, setRoomTitle] = useState("CHARLA");
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [inputName, setInputName] = useState("");
@@ -47,6 +18,9 @@ export default function Main() {
   const [inputCode, setInputCode] = useState("");
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
+  const [plugged, setPlugged] = useState(true);
+
+  const [notification, setNotification] = useState(Notification.permission);
   //for calculating the size of the messages area
   const h1Ref = useRef(null);
   const chatRef = useRef(null);
@@ -54,48 +28,91 @@ export default function Main() {
   const inFocusRef = useRef(null);
 
   useEffect(() => {
-    socket.on("room", (msg) => {
-      console.log(msg);
-      socket.on("joined", (msg) => console.log(msg));
+    //request permition if haven't been granted
+    //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        setNotification(permission);
+      });
+    }
+    //create function to avoid repeating code below
+    const roomMonitor = (socket) => {
+      const sessionRoom = JSON.parse(sessionStorage.getItem("sessionRoom"));
+      socket.on("room", (msg) => {
+        console.log("Message from server", msg);
+        socket.on("joined", (msg) => console.log(msg));
+      });
+      socket.on("message", (data) => {
+        if (notification === "granted" && data.user !== sessionRoom.user) {
+          audio.play();
+        }
+        //if server sends keyword in a message means the user left
+        const userGone = data.msg === "k@t@n@";
+        setMessages((prevMessages) => {
+          const socketMsg = {
+            text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
+            user: data.user,
+            font: userGone ? "Space Mono" : fonts(),
+            msgColor: userGone ? "magenta" : color(),
+            userColor: userGone ? "magenta" : color(),
+          };
+          return [socketMsg, ...prevMessages];
+        });
+      });
+    };
+    roomMonitor(socket);
+
+    socket.on("connect_error", () => {
+      //this listener handls the issue when the internet connection is lost even before the socket can stablishes a connection or other issues so the disconnect event may not trigger
+      console.log("CONNECTION ERROR");
+      socket.disconnect();
+      setPlugged(false);
     });
 
-    socket.on("message", (data) => {
-      const userGone = data.msg === "k@t@n@";
-      setMessages((prevMessages) => {
-        const socketMsg = {
-          text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
-          user: data.user,
-          font: userGone ? "Space Mono" : fonts(),
-          msgColor: userGone ? "magenta" : color(),
-          userColor: userGone ? "magenta" : color(),
-        };
-        return [socketMsg, ...prevMessages];
-      });
+    socket.on("disconnect", () => {
+      console.log("DISCONNECTED");
+      socket.disconnect();
+      setPlugged(false);
+      //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode.
+      //this listener handles disconnection from the socket and uses the inital room details which are stored in the sessionStorage to re-establish a connection to the socket. In theory, with this logic the connection will be on until the browser is closed
+      //when socket disconnects either due to browser minimasing for long, or computer hybernation etc.
+      //the code below executes but when the app gains focus again not sure how the code having executed after disconnection how will the code still be present since when the app gains focus again a new instance of a socket gets created...maybe in buffer/cache?
+
+      //roomMonitor(socket);
     });
+
     return () => {
+      console.log("CLEAN UP FUNCTION");
+      //remove the socket listeners that are not needed when the component is unmounted and in this case we dont need the connection since the app only has one component
       socket.off("room");
       socket.off("message");
+      socket.off("connect_error");
+      socket.off("disconnect");
       socket.disconnect();
     };
-  }, []);
+  }, [notification]);
 
   const handleMsgSubmit = (event) => {
+    console.log(plugged);
+    if (!plugged) {
+      socket.connect();
+      const sessionRoom = JSON.parse(sessionStorage.getItem("sessionRoom"));
+      console.log("RE-CONNECTING ");
+      socket.emit("room", {
+        //coalescing operator (??) assigns empty string if keys null or undefined.
+        user: sessionRoom.user ?? "",
+        name: sessionRoom.name ?? "",
+        code: sessionRoom.code ?? "",
+      });
+      setPlugged(true);
+    }
+
     event.preventDefault();
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
       alert("Dont use that kind of language please! - No diga grocerias!");
       setInputValue("");
     } else {
-      //after period of inactivity
-      if (!socket.connected) {
-        console.log("RE-CONNECTED");
-        socket.connect();
-        socket.emit("room", {
-          user: inputName.trim(),
-          name: inputRoom.trim(),
-          code: inputCode.trim(),
-        });
-      }
       socket.emit("message", trimmed);
       setInputValue("");
     }
@@ -110,19 +127,24 @@ export default function Main() {
       setInputCode("");
       setInputName("");
     } else {
-      if (socket.connected) {
-        //we conditionally emit events if the socket is not connected
-        //since if it is not connected the events will still be buffered
-        //and will add up to the events being emitted in the hanleMsgSubmit function that deals with re-connection after period of inactivity creating to connections and broadcasting double events.
-        socket.emit("room", {
-          user: inputName.trim(),
-          name: inputRoom.trim(),
-          code: inputCode.trim(),
-        });
-      }
+      //we conditionally emit events if the socket is not connected
+      //since if it is not connected the events will still be buffered
+      //and will add up to the events being emitted in the hanleMsgSubmit function that deals with re-connection after period of inactivity creating two connections and broadcasting double events.
+      const roomArr = [inputName.trim(), inputRoom.trim(), inputCode.trim()];
+      sessionStorage.setItem(
+        "sessionRoom",
+        JSON.stringify({
+          user: roomArr[0],
+          name: roomArr[1],
+          code: roomArr[2],
+        })
+      );
+      socket.emit("room", {
+        user: roomArr[0],
+        name: roomArr[1],
+        code: roomArr[2],
+      });
       setRoomTitle(inputRoom);
-      // setInputRoom("");
-      // setInputCode("");
       setRoomFormAnimate("main-room");
     }
   };
@@ -173,6 +195,7 @@ export default function Main() {
             />
             <br />
             <button type="submit">JOIN</button>
+            <br />
           </form>
         </div>
       </div>
@@ -198,7 +221,7 @@ export default function Main() {
               style={{
                 fontFamily: msg.font,
                 lineHeight: "1em",
-                fontSize: "2em",
+                fontSize: msg.font === "Rancho" ? "2.5em" : "2em",
                 textAlign: "left",
                 textShadow: `${
                   msg.msgColor === "magenta" ? "0px 0px 10px magenta" : ""
