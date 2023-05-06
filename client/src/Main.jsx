@@ -4,6 +4,7 @@ import { fonts, color, isRude } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
 const audio = new Audio(soundFile);
+audio.load();
 //socket-fel.koyeb.app/
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
@@ -27,6 +28,14 @@ export default function Main() {
   //focus cursor on chant input box
   const inFocusRef = useRef(null);
 
+  //when the browser is refreshed by the user, the component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener to obtain the value from sessionStorage, the current value of sessionStorage will be stored. When the user enter the new room details and thsese replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect, theen we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listener which is undesireable. The solution is to wrap the variable in a useRef to be able to use the variable inside the useEffect without needing to make it a dependency. When the browser is refreshed the component re-mounted and the component function re-render the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and use the roomTitle variable that causes a re-render once after the user submits room details and the title of the app gets epdated.
+
+  const localUser = useRef(null);
+
+  useEffect(() => {
+    localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom")).user;
+  }, [roomTitle]);
+
   useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
@@ -35,49 +44,41 @@ export default function Main() {
         setNotification(permission);
       });
     }
-    //create function to avoid repeating code below
-    const roomMonitor = (socket) => {
-      const sessionRoom = JSON.parse(sessionStorage.getItem("sessionRoom"));
-      socket.on("room", (msg) => {
-        console.log("Message from server", msg);
-        socket.on("joined", (msg) => console.log(msg));
-      });
-      socket.on("message", (data) => {
-        if (
-          typeof data?.user !== "undefined" &&
-          typeof sessionRoom?.user !== "undefined"
-        ) {
-          if (notification === "granted" && sessionRoom.user !== data.user) {
-            audio.play();
-          }
+    socket.on("room", (msg) => {
+      console.log("Message from server", msg);
+      socket.on("joined", (msg) => console.log(msg));
+    });
+    socket.on("message", (data) => {
+      if (data?.user) {
+        if (notification === "granted" && localUser.current !== data.user) {
+          audio.play();
         }
+      }
 
-        //if server sends keyword in a message means the user left
-        const userGone = data.msg === "k@t@n@";
-        setMessages((prevMessages) => {
-          const socketMsg = {
-            text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
-            user: data.user,
-            font: userGone ? "Space Mono" : fonts(),
-            msgColor: userGone ? "magenta" : color(),
-            userColor: userGone ? "magenta" : color(),
-          };
-          return [socketMsg, ...prevMessages];
-        });
+      //if server sends keyword in a message means the user left
+      const userGone = data.msg === "k@t@n@";
+      setMessages((prevMessages) => {
+        const socketMsg = {
+          text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
+          user: data.user,
+          font: userGone ? "Space Mono" : fonts(),
+          msgColor: userGone ? "magenta" : color(),
+          userColor: userGone ? "magenta" : color(),
+        };
+        return [socketMsg, ...prevMessages];
       });
-    };
-    roomMonitor(socket);
+    });
 
     socket.on("connect_error", () => {
       //this listener handls the issue when the internet connection is lost even before the socket can stablishes a connection or other issues so the disconnect event may not trigger
       console.log("CONNECTION ERROR");
-      socket.disconnect();
+      //socket.disconnect(); //I think this is not needed since once inside the listener setPlugged will be set to false regardless of this line, and the main point of this listener is to set plugged to false
       setPlugged(false);
     });
 
     socket.on("disconnect", () => {
       console.log("DISCONNECTED");
-      socket.disconnect();
+      //socket.disconnect(); I think this is not needed
       setPlugged(false);
       //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode.
       //this listener handles disconnection from the socket and uses the inital room details which are stored in the sessionStorage to re-establish a connection to the socket. In theory, with this logic the connection will be on until the browser is closed
@@ -99,7 +100,7 @@ export default function Main() {
   }, [notification]);
 
   const handleMsgSubmit = (event) => {
-    console.log(plugged);
+    //if cocket disconnects plugged turns 'false' and room details stored in session storage are sent to the server to re-join the room
     if (!plugged) {
       socket.connect();
       const sessionRoom = JSON.parse(sessionStorage.getItem("sessionRoom"));
