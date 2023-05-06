@@ -33,7 +33,7 @@ export default function Main() {
   const localUser = useRef(null);
 
   useEffect(() => {
-    localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"))?.user;
+    localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"));
   }, [roomTitle]);
 
   useEffect(() => {
@@ -49,8 +49,12 @@ export default function Main() {
       socket.on("joined", (msg) => console.log(msg));
     });
     socket.on("message", (data) => {
+      //msg sound notification logic
       if (data?.user) {
-        if (notification === "granted" && localUser.current !== data.user) {
+        if (
+          notification === "granted" &&
+          localUser.current?.user !== data.user
+        ) {
           audio.play();
         }
       }
@@ -103,13 +107,12 @@ export default function Main() {
     //if cocket disconnects plugged turns 'false' and room details stored in session storage are sent to the server to re-join the room
     if (!plugged) {
       socket.connect();
-      const sessionRoom = JSON.parse(sessionStorage.getItem("sessionRoom"));
       console.log("RE-CONNECTING ");
       socket.emit("room", {
         //coalescing operator (??) assigns empty string if keys null or undefined.
-        user: sessionRoom.user ?? "",
-        name: sessionRoom.name ?? "",
-        code: sessionRoom.code ?? "",
+        user: localUser.user ?? "",
+        name: localUser.name ?? "",
+        code: localUser.code ?? "",
       });
       setPlugged(true);
     }
