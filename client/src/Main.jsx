@@ -33,7 +33,7 @@ export default function Main() {
   const localUser = useRef(null);
 
   useEffect(() => {
-    localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom")).user;
+    localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"))?.user;
   }, [roomTitle]);
 
   useEffect(() => {
@@ -72,13 +72,13 @@ export default function Main() {
     socket.on("connect_error", () => {
       //this listener handls the issue when the internet connection is lost even before the socket can stablishes a connection or other issues so the disconnect event may not trigger
       console.log("CONNECTION ERROR");
-      //socket.disconnect(); //I think this is not needed since once inside the listener setPlugged will be set to false regardless of this line, and the main point of this listener is to set plugged to false
+      //socket.disconnect();//I think this is not necessary since once inside the listener, setPlugged will set plugged to 'false' which is the main purpouse of the listener and socket disconnect would not be necessary
       setPlugged(false);
     });
 
     socket.on("disconnect", () => {
       console.log("DISCONNECTED");
-      //socket.disconnect(); I think this is not needed
+      //socket.disconnect(); //may not be necessary
       setPlugged(false);
       //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode.
       //this listener handles disconnection from the socket and uses the inital room details which are stored in the sessionStorage to re-establish a connection to the socket. In theory, with this logic the connection will be on until the browser is closed
