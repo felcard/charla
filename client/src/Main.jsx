@@ -21,7 +21,7 @@ export default function Main() {
   const [finalSize, setFinalSize] = useState(0);
   const [plugged, setPlugged] = useState(true);
 
-  const [notification, setNotification] = useState(Notification.permission);
+  //const [notification, setNotification] = useState(Notification.permission);
   //for calculating the size of the messages area
   const h1Ref = useRef(null);
   const chatRef = useRef(null);
@@ -39,11 +39,14 @@ export default function Main() {
   useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then((permission) => {
-        setNotification(permission);
-      });
-    }
+
+    //Notifications permission
+
+    // if (Notification.permission !== "granted") {
+    //   Notification.requestPermission().then((permission) => {
+    //     setNotification(permission);
+    //   });
+    // }
     socket.on("room", (msg) => {
       console.log("Message from server", msg);
       socket.on("joined", (msg) => console.log(msg));
@@ -52,7 +55,7 @@ export default function Main() {
       //msg sound notification logic
       if (data?.user) {
         if (
-          notification === "granted" &&
+          // notification === "granted" &&
           localUser.current?.user !== data.user
         ) {
           audio.play();
@@ -101,7 +104,7 @@ export default function Main() {
       socket.off("disconnect");
       socket.disconnect();
     };
-  }, [notification]);
+  }, []);
 
   const handleMsgSubmit = (event) => {
     //if cocket disconnects plugged turns 'false' and room details stored in session storage are sent to the server to re-join the room
