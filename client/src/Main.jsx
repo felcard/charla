@@ -110,9 +110,9 @@ export default function Main() {
       console.log("RE-CONNECTING ");
       socket.emit("room", {
         //coalescing operator (??) assigns empty string if keys null or undefined.
-        user: localUser.user ?? "",
-        name: localUser.name ?? "",
-        code: localUser.code ?? "",
+        user: localUser.current.user ?? "",
+        name: localUser.current.name ?? "",
+        code: localUser.current.code ?? "",
       });
       setPlugged(true);
     }
