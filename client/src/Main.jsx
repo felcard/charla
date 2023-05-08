@@ -4,11 +4,15 @@ import { fonts, color, isRude } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
 const audio = new Audio(soundFile);
-audio.load();
+audio.load(); //for tests not sure if needed
 //socket-fel.koyeb.app/
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
-}); //io() initiates socket connection. But connection is async so to get socket.id needs to be done inside socket.on('connect',()=>console.log(socket.id))
+}); //When you create a socket object using the io() constructor, it automatically attempts to establish a connection to the server using the specified transport options. If the connection is successful, the 'connect' event is emitted, and you can listen for it using the socket.on() method.If the socket object is disconnected from the server, any subsequent calls to socket.emit() will not automatically start a new connection. Instead, the emit() method will try to send the data over the existing disconnected socket, which will result in an error. To establish a new connection, you'll need to call the connect() method on the socket object.
+
+//When you create a new socket instance using the io() constructor, the instance establishes a connection to the server and is assigned a unique socket ID. If the connection is lost, and you reconnect to the same server using the same socket instance, a new connection with a different socket ID will be established.
+//So even though the socket instance remains the same, the underlying connection is a new connection with a new socket ID. Any listeners registered on the socket instance before the disconnection will still be active on the new connection, and any new listeners registered on the socket instance after the reconnection will only be active on the new connection.
+//SO ensure listeners are declared only once and removed (socket.off) before declaring them again. Ideally placed in a useEffect that only runs once when the component mounts
 
 export default function Main() {
   const [roomTitle, setRoomTitle] = useState("CHARLA");
@@ -28,36 +32,29 @@ export default function Main() {
   //focus cursor on chant input box
   const inFocusRef = useRef(null);
 
-  //when the browser is refreshed by the user, the component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener to obtain the value from sessionStorage, the current value of sessionStorage will be stored. When the user enter the new room details and thsese replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect, theen we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listener which is undesireable. The solution is to wrap the variable in a useRef to be able to use the variable inside the useEffect without needing to make it a dependency. When the browser is refreshed the component re-mounted and the component function re-render the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and use the roomTitle variable that causes a re-render once after the user submits room details and the title of the app gets epdated.
+  //when the browser is refreshed by the user, the react component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener is, to obtain the value from sessionStorage, the current value of sessionStorage will be stored. When the user enter the new room details via the submithandler, and thsese replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect, then we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listener which is undesireable. The solution is to wrap the variable in a useRef to be able to use the variable inside the useEffect without needing to make it a dependency. When the browser is refreshed the component re-mounted and the component function re-render the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and as a dependency, we use the roomTitle variable which causes a re-render only once after the user submits room details and the title of the app gets epdated.
 
   const localUser = useRef(null);
-
   useEffect(() => {
     localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"));
   }, [roomTitle]);
 
-  useEffect(() => {
-    //request permition if haven't been granted
-    //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
+  //wrap function in userRef so can be included in useEffect without making it a dependency and also function can be used outside useEffect
 
-    //Notifications permission
-
-    // if (Notification.permission !== "granted") {
-    //   Notification.requestPermission().then((permission) => {
-    //     setNotification(permission);
-    //   });
-    // }
-    socket.on("room", (msg) => {
-      console.log("Message from server", msg);
-      socket.on("joined", (msg) => console.log(msg));
+  const socketListeners = useRef((socket, chatMsg, room, joined) => {
+    socket.on(room, (msg) => {
+      console.log("Message from server => ", msg);
+      socket.on(joined, (msg) => console.log(`user: ${socket.id} ${msg}`));
     });
-    socket.on("message", (data) => {
+
+    socket.on(chatMsg, (data) => {
       //msg sound notification logic
       if (data?.user) {
         if (
-          // notification === "granted" &&
+          //notification === "granted" &&
           localUser.current?.user !== data.user
         ) {
+          audio.currentTime = 0;
           audio.play();
         }
       }
@@ -79,37 +76,53 @@ export default function Main() {
     socket.on("connect_error", () => {
       //this listener handls the issue when the internet connection is lost even before the socket can stablishes a connection or other issues so the disconnect event may not trigger
       console.log("CONNECTION ERROR");
-      //socket.disconnect();//I think this is not necessary since once inside the listener, setPlugged will set plugged to 'false' which is the main purpouse of the listener and socket disconnect would not be necessary
+      //IF USING socket.removeAllListeners(); it also removes the srror listeners so they need to be added again
+      socket.off(room);
+      socket.off(chatMsg);
+      socket.off(joined);
+      socket.disconnect(); //there could be times where for a glitch the server can emit a 'connect_error' event and the socket could still be connected, if we did not have the socket.disconnect then the msgSubmit handler will be creating a new connection since 'plugged' state will be 'false'
       setPlugged(false);
     });
 
     socket.on("disconnect", () => {
       console.log("DISCONNECTED");
-      //socket.disconnect(); //may not be necessary
+      socket.off(room);
+      socket.off(chatMsg);
+      socket.off(joined);
+      socket.disconnect(); //same as above disconnect events can be triggered even when socket is still on
       setPlugged(false);
-      //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode.
-      //this listener handles disconnection from the socket and uses the inital room details which are stored in the sessionStorage to re-establish a connection to the socket. In theory, with this logic the connection will be on until the browser is closed
-      //when socket disconnects either due to browser minimasing for long, or computer hybernation etc.
-      //the code below executes but when the app gains focus again not sure how the code having executed after disconnection how will the code still be present since when the app gains focus again a new instance of a socket gets created...maybe in buffer/cache?
-
-      //roomMonitor(socket);
+      //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' + 'connect_error' approach seems to work better
     });
+  });
+
+  useEffect(() => {
+    //request permition if haven't been granted
+    //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
+    // if (Notification.permission !== "granted") {
+    //   Notification.requestPermission().then((permission) => {
+    //     setNotification(permission);
+    //   });
+    // }
+    //socket listeners need to be in a useEffect so they are only declared once, otherwise we get multiple listeners listening for the same event resulting in double actions like rendering messages two times
+
+    socketListeners.current(socket, "message", "room", "joined");
 
     return () => {
       console.log("CLEAN UP FUNCTION");
-      //remove the socket listeners that are not needed when the component is unmounted and in this case we dont need the connection since the app only has one component
-      socket.off("room");
-      socket.off("message");
-      socket.off("connect_error");
-      socket.off("disconnect");
+      //remove the socket listeners that are not needed when the component is unmounted and in this case we dont need the connection since the app only has one component so we can do socket.disconnect()
+      //we use socket.offAny() to remove all listeners and this method work when listeners are anonymous functions but if we wanted to individually remove listeners we would need to use NAMED functions
+      socket.removeAllListeners();
       socket.disconnect();
     };
   }, []);
 
   const handleMsgSubmit = (event) => {
+    event.preventDefault();
     //if cocket disconnects plugged turns 'false' and room details stored in session storage are sent to the server to re-join the room
     if (!plugged) {
       socket.connect();
+      //on disconnection the socket listeners need to be removed to avoid re-connecting and having the listener listen to two connections. So if the listeners are removed thery need to be re-declared on re-connection so the new connection have listeners and hence the socketListeners function re attaches listener to the new connection
+      socketListeners.current(socket, "message");
       console.log("RE-CONNECTING ");
       socket.emit("room", {
         //coalescing operator (??) assigns empty string if keys null or undefined.
@@ -119,7 +132,6 @@ export default function Main() {
       });
       setPlugged(true);
     }
-    event.preventDefault();
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
       alert("Dont use that kind of language please! - No diga grocerias!");
@@ -139,9 +151,6 @@ export default function Main() {
       setInputCode("");
       setInputName("");
     } else {
-      //we conditionally emit events if the socket is not connected
-      //since if it is not connected the events will still be buffered
-      //and will add up to the events being emitted in the hanleMsgSubmit function that deals with re-connection after period of inactivity creating two connections and broadcasting double events.
       const roomArr = [inputName.trim(), inputRoom.trim(), inputCode.trim()];
       sessionStorage.setItem(
         "sessionRoom",
@@ -151,11 +160,16 @@ export default function Main() {
           code: roomArr[2],
         })
       );
-      socket.emit("room", {
-        user: roomArr[0],
-        name: roomArr[1],
-        code: roomArr[2],
-      });
+      //we conditionally emit events if the socket is not disconnected
+      //since if it is disconnected the events will still be buffered
+      //and wneh the socket re-gains connection this event will be in the queue and the user will be emiting room details twice: initially creating the room as per the server logic, and secondly via the handleMsgSubmit since 'plugged' state will be false and room details will be emitted this time joining the room; resulting in the user having joined the room twice in the server getting the messages back two times!
+      if (!socket.disconnected) {
+        socket.emit("room", {
+          user: roomArr[0],
+          name: roomArr[1],
+          code: roomArr[2],
+        });
+      }
       setRoomTitle(inputRoom);
       setRoomFormAnimate("main-room");
     }
