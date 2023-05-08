@@ -9,7 +9,6 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     console.log(`user: ${socket.id} connected to MAIN`);
-
     socket.on('room', room => {
         if (!io.sockets.adapter.rooms.has(room.name)) {
             socket.emit('room', `room created: ${room.name}`);
@@ -24,8 +23,8 @@ io.on('connection', (socket) => {
             socket.on('disconnect', () => {
                 io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
+                socket.offAny();
             });
-            socket.offAny();
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
             if (room.code === roomData.data.code) {
@@ -39,8 +38,8 @@ io.on('connection', (socket) => {
                 socket.on('disconnect', () => {
                     io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
+                    socket.offAny();
                 });
-                socket.offAny();
             } else {
                 socket.emit('room', 'ROOM TAKEN');
             }
