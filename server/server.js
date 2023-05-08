@@ -11,7 +11,6 @@ io.on('connection', (socket) => {
     console.log(`user: ${socket.id} connected to MAIN`);
 
     socket.on('room', room => {
-        console.log('room created');
         if (!io.sockets.adapter.rooms.has(room.name)) {
             socket.emit('room', `room created: ${room.name}`);
             socket.join(room.name);
@@ -22,6 +21,11 @@ io.on('connection', (socket) => {
                 console.log(`user: ${socket.id} sent a message`);
                 io.to(room.name).emit('message', { msg: data, user: room.user });
             });
+            socket.on('disconnect', () => {
+                io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                console.log(`User: ${socket.id} disconnected from MAIN.`);
+            });
+            socket.offAny();
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
             if (room.code === roomData.data.code) {
@@ -32,18 +36,20 @@ io.on('connection', (socket) => {
                     console.log(`user: ${socket.id} sent a message`);
                     io.to(room.name).emit('message', { msg: data, user: room.user });
                 });
+                socket.on('disconnect', () => {
+                    io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                    console.log(`User: ${socket.id} disconnected from MAIN.`);
+                });
+                socket.offAny();
             } else {
                 socket.emit('room', 'ROOM TAKEN');
             }
         }
-        // Listen for disconnection
-        socket.on('disconnect', () => {
-            io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
-            console.log(`User: ${socket.id} disconnected from MAIN.`);
-        });
-
     });
-
+    //this listens for disconnection event from a socket that has not joind a room, whereas the other two inside if or else block will listen those two different socket paths
+    socket.on('disconnect', () => {
+        console.log(`user: ${socket.id} DISCONNECTED`);
+    });
 });
 const { PORT = 8000 } = process.env;
 server.listen(PORT, () => {
