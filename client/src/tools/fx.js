@@ -19,12 +19,11 @@ export const color = () => {
 
 export const isRude = (rudeWords, userInput) => {
     const rudeArr = rudeWords.split(",");
-    const inputArr = userInput.split(" ");
-    let result;
+    const inputStr = userInput.match(/[a-z]/gi).join('');
+    let result = false;
     rudeArr.forEach((word) => {
-        inputArr.forEach((badWord) => {
-            if (badWord.toLowerCase() === word) result = true;
-        });
+        console.log(word);
+        if (inputStr.includes(word)) result = true;
     });
     return result;
 };

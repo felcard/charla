@@ -25,7 +25,7 @@ export default function Main() {
   const [finalSize, setFinalSize] = useState(0);
   const [plugged, setPlugged] = useState(true);
 
-  //const [notification, setNotification] = useState(Notification.permission);
+  const [notification, setNotification] = useState(Notification.permission);
   //for calculating the size of the messages area
   const h1Ref = useRef(null);
   const chatRef = useRef(null);
@@ -51,7 +51,7 @@ export default function Main() {
       //msg sound notification logic
       if (data?.user) {
         if (
-          //notification === "granted" &&
+          notification === "granted" &&
           localUser.current?.user !== data.user
         ) {
           audio.currentTime = 0;
@@ -98,11 +98,11 @@ export default function Main() {
   useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
-    // if (Notification.permission !== "granted") {
-    //   Notification.requestPermission().then((permission) => {
-    //     setNotification(permission);
-    //   });
-    // }
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        setNotification(permission);
+      });
+    }
     //socket listeners need to be in a useEffect so they are only declared once, otherwise we get multiple listeners listening for the same event resulting in double actions like rendering messages two times
 
     socketListeners.current(socket, "message", "room", "joined");
@@ -114,7 +114,7 @@ export default function Main() {
       socket.removeAllListeners();
       socket.disconnect();
     };
-  }, []);
+  }, [notification]);
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
@@ -134,7 +134,7 @@ export default function Main() {
     }
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
-      alert("Dont use that kind of language please! - No diga grocerias!");
+      alert("Unaccepted word found! - Contiene palabra invalida!");
       setInputValue("");
     } else {
       socket.emit("message", trimmed);
@@ -146,7 +146,7 @@ export default function Main() {
     event.preventDefault();
     const totValues = inputName + " " + inputRoom + " " + inputCode;
     if (isRude(bad, totValues)) {
-      alert("Dont use that kind of language please! - No diga groserias!");
+      alert("Unaccepted word found! - Contiene palabra invalida!");
       setInputRoom("");
       setInputCode("");
       setInputName("");
