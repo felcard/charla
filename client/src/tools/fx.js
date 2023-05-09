@@ -19,10 +19,12 @@ export const color = () => {
 
 export const isRude = (rudeWords, userInput) => {
     const rudeArr = rudeWords.split(",");
-    const inputStr = userInput.match(/[a-z]/gi).join('');
+    //separator is the regular expression \b, which matches a word boundary. A word boundary is a position between a word character (as defined by \w) and a non-word character (as defined by \W), or between a word character and the start or end of the string.
+    const inputStr = userInput.split(/\b/);
     let result = false;
-    rudeArr.forEach((word) => {
-        if (inputStr.includes(word)) result = true;
-    });
+    for (let word of inputStr) {
+        if (rudeArr.includes(word)) result = true;
+        break;
+    }
     return result;
 };
