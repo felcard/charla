@@ -40,7 +40,6 @@ export default function Main() {
   }, [roomTitle]);
 
   //wrap function in userRef so can be included in useEffect without making it a dependency and also function can be used outside useEffect
-
   const socketListeners = useRef((socket, chatMsg, room, joined) => {
     socket.on(room, (msg) => {
       console.log("Message from server => ", msg);
