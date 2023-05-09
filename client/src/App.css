@@ -8,6 +8,10 @@
 body {
   background: rgb(26, 21, 2);
 }
+input,
+button {
+  border-radius: 4px;
+}
 #cont {
   color: rgb(126, 23, 23);
   width: 100vw;
@@ -113,11 +117,11 @@ input {
   height: 100%;
   color: rgb(151, 224, 200);
   outline: none;
-  border: none;
   width: 100%;
   font-size: 0.8em;
   margin: 0px;
   height: 1.5em;
+  padding-bottom: 0.2em;
 }
 @keyframes expand {
   from {
@@ -134,7 +138,6 @@ input {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    border: solid 1px rgb(200, 154, 226);
     text-align: left;
     width: 94vw;
     bottom: 0px;
