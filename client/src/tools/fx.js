@@ -22,7 +22,6 @@ export const isRude = (rudeWords, userInput) => {
     const inputStr = userInput.match(/[a-z]/gi).join('');
     let result = false;
     rudeArr.forEach((word) => {
-        console.log(word);
         if (inputStr.includes(word)) result = true;
     });
     return result;

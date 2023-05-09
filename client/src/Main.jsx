@@ -72,23 +72,17 @@ export default function Main() {
         return [socketMsg, ...prevMessages];
       });
     });
-
     socket.on("connect_error", () => {
       //this listener handls the issue when the internet connection is lost even before the socket can stablishes a connection or other issues so the disconnect event may not trigger
       console.log("CONNECTION ERROR");
-      //IF USING socket.removeAllListeners(); it also removes the srror listeners so they need to be added again
-      socket.off(room);
-      socket.off(chatMsg);
-      socket.off(joined);
+      //IF USING socket.removeAllListeners(); it also removes the error listeners so they need to be added again other option is to remove all listeners individually
+      socket.removeAllListeners();
       socket.disconnect(); //there could be times where for a glitch the server can emit a 'connect_error' event and the socket could still be connected, if we did not have the socket.disconnect then the msgSubmit handler will be creating a new connection since 'plugged' state will be 'false'
       setPlugged(false);
     });
-
     socket.on("disconnect", () => {
       console.log("DISCONNECTED");
-      socket.off(room);
-      socket.off(chatMsg);
-      socket.off(joined);
+      socket.removeAllListeners();
       socket.disconnect(); //same as above disconnect events can be triggered even when socket is still on
       setPlugged(false);
       //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' + 'connect_error' approach seems to work better
@@ -122,7 +116,7 @@ export default function Main() {
     if (!plugged) {
       socket.connect();
       //on disconnection the socket listeners need to be removed to avoid re-connecting and having the listener listen to two connections. So if the listeners are removed thery need to be re-declared on re-connection so the new connection have listeners and hence the socketListeners function re attaches listener to the new connection
-      socketListeners.current(socket, "message");
+      socketListeners.current(socket, "message", "room", "joined");
       console.log("RE-CONNECTING ");
       socket.emit("room", {
         //coalescing operator (??) assigns empty string if keys null or undefined.
