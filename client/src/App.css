@@ -51,7 +51,6 @@ h1 {
   font-size: 1.5em;
   width: 30vw;
 }
-
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: rgb(95, 47, 139);
@@ -145,7 +144,6 @@ input {
     text-align: left;
     width: 0px;
     bottom: 0px;
-    margin-bottom: 10px;
   }
   to {
     position: fixed;
@@ -154,8 +152,6 @@ input {
     transform: translateX(-50%);
     text-align: left;
     width: 94vw;
-    bottom: 0px;
-    margin-bottom: 10px;
     background: rgb(36, 16, 41);
     visibility: visible;
   }

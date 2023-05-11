@@ -272,6 +272,13 @@ export default function Main() {
         id="chat-input-form"
         ref={chatRef}
         style={{
+          position: "fixed",
+          top:
+            finalSize !== 0
+              ? h1Ref.current.clientHeight +
+                finalSize +
+                window.visualViewport.height * 0.02
+              : window.visualViewport.height - 30,
           visibility: "hidden",
           //we take 2px off the width to account for borders since
           //100vw on its own does not include borders so if we set
@@ -285,16 +292,13 @@ export default function Main() {
       >
         <input
           ref={inFocusRef}
-          style={{
-            top: h1Ref.current
-              ? h1Ref.current.clientHeight +
-                finalSize +
-                window.visualViewport.height * 0.03
-              : 0,
-            // width: "0px",
-            // border: "solid 1px transparent",
-            // fontSize: "1.3em",
-          }}
+          style={
+            {
+              // width: "0px",
+              // border: "solid 1px transparent",
+              // fontSize: "1.3em",
+            }
+          }
           //className={roomFormAnimate === "room-form-start" ? "" : "expand"}
           type="text"
           placeholder="Type your message here"
