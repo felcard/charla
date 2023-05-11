@@ -120,7 +120,7 @@ export default function Main() {
       socket.emit("room", {
         //coalescing operator (??) assigns empty string if keys null or undefined.
         user: localUser.current.user ?? "",
-        name: localUser.current.name ?? "",
+        name: localUser.current.name.toLowerCase() ?? "",
         code: localUser.current.code ?? "",
       });
       setPlugged(true);
@@ -149,7 +149,7 @@ export default function Main() {
         "sessionRoom",
         JSON.stringify({
           user: roomArr[0],
-          name: roomArr[1],
+          name: roomArr[1].toLocaleLowerCase(),
           code: roomArr[2],
         })
       );
@@ -159,7 +159,7 @@ export default function Main() {
       if (!socket.disconnected) {
         socket.emit("room", {
           user: roomArr[0],
-          name: roomArr[1],
+          name: roomArr[1].toLowerCase(),
           code: roomArr[2],
         });
       }
@@ -170,10 +170,10 @@ export default function Main() {
   useEffect(() => {
     const screenResizer = () => {
       setFinalSize(
-        window.innerHeight -
+        window.visualViewport.height -
           h1Ref.current?.clientHeight -
           chatRef.current?.clientHeight -
-          window.innerHeight * 0.03
+          window.visualViewport.height * 0.03
       );
     };
     window.addEventListener("resize", screenResizer);
