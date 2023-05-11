@@ -9,11 +9,6 @@
   margin: 0px;
   padding: 0px;
 }
-html,
-body {
-  overflow: hidden -moz-hidden-unscrollable;
-  overscroll-behavior: none;
-}
 ::-webkit-scrollbar {
   display: none;
 }

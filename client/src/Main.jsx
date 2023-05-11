@@ -170,10 +170,10 @@ export default function Main() {
   useEffect(() => {
     const screenResizer = () => {
       setFinalSize(
-        window.visualViewport.height -
+        window.innerHeight -
           h1Ref.current?.clientHeight -
           chatRef.current?.clientHeight -
-          window.visualViewport.height * 0.03
+          window.innerHeight * 0.03
       );
     };
     window.addEventListener("resize", screenResizer);
@@ -186,10 +186,10 @@ export default function Main() {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
     setFinalSize(
-      window.visualViewport.height -
+      window.innerHeight -
         h1Ref.current?.clientHeight -
         chatRef.current?.clientHeight -
-        window.visualViewport.height * 0.03
+        window.innerHeight * 0.03
     );
     inFocusRef.current.focus();
   };
@@ -277,8 +277,8 @@ export default function Main() {
             finalSize !== 0
               ? h1Ref.current.clientHeight +
                 finalSize +
-                window.visualViewport.height * 0.02
-              : window.visualViewport.height - 30,
+                window.innerHeight * 0.02
+              : window.innerHeight - 30,
           visibility: "hidden",
           //we take 2px off the width to account for borders since
           //100vw on its own does not include borders so if we set
