@@ -186,10 +186,10 @@ export default function Main() {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
     setFinalSize(
-      window.innerHeight -
+      window.visualViewport.height -
         h1Ref.current?.clientHeight -
         chatRef.current?.clientHeight -
-        window.innerHeight * 0.03
+        window.visualViewport.height * 0.03
     );
     inFocusRef.current.focus();
   };
@@ -233,8 +233,10 @@ export default function Main() {
       <div
         id="chat-messages"
         style={{
-          //marginTop of the size og title element + 5px title margin-top
-          marginTop: h1Ref.current?.clientHeight + 5,
+          //marginTop equals the height of the title plus 1vh (window.innerHeight * 0.01) which is the title's top margin
+          marginTop: h1Ref.current
+            ? h1Ref.current.clientHeight + window.innerHeight * 0.01
+            : 0,
           overflowY: "auto",
           scrollBehavior: "smooth",
           display: "flex",
