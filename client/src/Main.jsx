@@ -163,30 +163,42 @@ export default function Main() {
           code: roomArr[2],
         });
       }
-      setRoomTitle(inputRoom);
+      setRoomTitle(inputRoom.toLowerCase());
       setRoomFormAnimate("main-room");
     }
   };
+  useEffect(() => {
+    const screenResizer = () => {
+      setFinalSize(
+        window.innerHeight -
+          h1Ref.current?.clientHeight -
+          chatRef.current?.clientHeight -
+          window.innerHeight * 0.03
+      );
+    };
+    window.addEventListener("resize", screenResizer);
 
-  //expandEnd listens for the end of the final animation so the elements ar
+    return () => window.removeEventListener("resize", screenResizer);
+  }, []);
+  //onExpandAnimationEnd listens for the end of the final animation so the elements ar
   //all in place and we can calculate their sizes correctly
-  const expandEnd = () => {
+  const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
     setFinalSize(
       window.innerHeight -
         h1Ref.current?.clientHeight -
         chatRef.current?.clientHeight -
-        window.innerHeight * 0.02
+        window.innerHeight * 0.03
     );
     inFocusRef.current.focus();
   };
   return (
     <div id="cont">
+      <h1 ref={h1Ref}>{roomTitle}</h1>
       <div id="nav">
-        <h1 ref={h1Ref}>{roomTitle}</h1>
         <div
-          id="room-form"
+          id="room-form-cont"
           className={roomFormAnimate}
           onAnimationEnd={() => setRoomFormAnimate("room-form-disappear")}
           onSubmit={handleRoomSubmit}
@@ -218,12 +230,11 @@ export default function Main() {
           </form>
         </div>
       </div>
-
       <div
         id="chat-messages"
         style={{
-          //marginTop of the size og title element
-          marginTop: h1Ref.current?.clientHeight,
+          //marginTop of the size og title element + 5px title margin-top
+          marginTop: h1Ref.current?.clientHeight + 5,
           overflowY: "auto",
           scrollBehavior: "smooth",
           display: "flex",
@@ -260,16 +271,14 @@ export default function Main() {
         ref={chatRef}
         style={{
           visibility: "hidden",
-          border: "solid 1px transparent",
           //we take 2px off the width to account for borders since
           //100vw on its own does not include borders so if we set
           //the width of an element to 100vw and also add borders then the
-          //elemnt's width will overflow!!
-          width: "calc(100vw-2px)",
-          fontSize: "1.3em",
+          //elemnt's width will overflow although initially hidden can cause horizontal scroll bar to appear!!
+          width: "calc(100vw - 2px)",
         }}
         className={roomFormAnimate === "room-form-start" ? "" : "expand"}
-        onAnimationEnd={expandEnd}
+        onAnimationEnd={onExpandAnimationEnd}
         onSubmit={handleMsgSubmit}
       >
         <input

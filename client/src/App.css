@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "titulo";
+  src: url("./tools/fonts/Cube.woff2") format("woff2");
+  /* url("./tools/neonize.woff") format("woff"); */
+  /* Add additional font formats if available */
+  /* Specify font-weight and font-style if desired */
+}
 * {
   margin: 0px;
   padding: 0px;
@@ -7,10 +14,6 @@
 }
 body {
   background: rgb(26, 21, 2);
-}
-input,
-button {
-  border-radius: 4px;
 }
 #cont {
   color: rgb(126, 23, 23);
@@ -26,15 +29,22 @@ button {
   left: 50%;
   transform: translateX(-50%);
 }
-#nav h1 {
+h1 {
+  top: 1vh;
   width: 98vw;
   position: fixed;
-  top: 0px;
   left: 50%;
   transform: translateX(-50%);
   background: rgb(26, 21, 2);
-  font-family: "nabla";
-  font-size: 3em;
+  font-family: titulo;
+  /* color: rgb(98, 211, 70);
+  text-shadow: 0px 0px 15px rgb(224, 124, 255); */
+  background: linear-gradient(180deg, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: lighter;
+  font-size: 2.5em;
 }
 #nav input {
   height: 2em;
@@ -44,7 +54,7 @@ button {
 
 ::placeholder {
   /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgb(114, 255, 121);
+  color: rgb(95, 47, 139);
   opacity: 1; /* Firefox */
   font-family: Space Mono;
   font-size: 1em;
@@ -52,19 +62,19 @@ button {
   text-align: center;
 }
 button {
-  color: #58ff74;
+  color: rgb(154, 210, 255);
   background: transparent;
   cursor: pointer;
-  border: solid 1px rgb(188, 138, 218);
+  border: solid 1px rgb(210, 132, 255);
   outline: none;
   margin-top: 2em;
   padding: 0.1em 0.3em;
   font-size: 1.5em;
   font-family: space mono;
 }
-#room-form {
-  margin-top: 30vh;
-  transform: translateY(-50%);
+#room-form-cont {
+  margin-top: 15vh;
+  /* transform: translateY(-50%); */
 }
 
 .room-form-start {
@@ -98,14 +108,17 @@ button {
   padding-left: "3vw";
 }
 input {
+  padding-left: 0.2em;
   margin-bottom: 0.3em;
   font-family: space mono;
   height: 1.5em;
   color: rgb(151, 224, 200);
   background: rgb(36, 16, 41);
   outline: none;
-  border: solid 1px rgb(210, 159, 240);
+  border: solid 1px rgb(147, 105, 172);
   width: 20em;
+  border-image: linear-gradient(90deg, #f954ff, #00ffff) 1;
+  border-image-slice: 1;
 }
 .expand {
   animation: expand 0.5s ease-out;
@@ -115,13 +128,13 @@ input {
 .expand input {
   font-family: space mono;
   height: 100%;
-  color: rgb(151, 224, 200);
+  color: rgb(151, 224, 155);
   outline: none;
   width: 100%;
   font-size: 0.8em;
   margin: 0px;
   height: 1.5em;
-  padding-bottom: 0.2em;
+  padding: 0 0 0.2em 0.1em;
 }
 @keyframes expand {
   from {
@@ -136,6 +149,7 @@ input {
   }
   to {
     position: fixed;
+    font-size: 1.3em;
     left: 50%;
     transform: translateX(-50%);
     text-align: left;
@@ -147,9 +161,13 @@ input {
   }
 }
 @media screen and (max-aspect-ratio: 1/1) {
+  /* when screen height > width */
+  h1 {
+    font-size: 7vw;
+  }
   #nav input {
     font-size: 1.5em;
-    width: 95vw;
+    width: 80vw;
   }
   #chat-messages {
     font-size: 0.9em;
