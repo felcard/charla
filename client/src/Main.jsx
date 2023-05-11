@@ -285,11 +285,16 @@ export default function Main() {
       >
         <input
           ref={inFocusRef}
-          // style={{
-          //   width: "0px",
-          //   border: "solid 1px transparent",
-          //   fontSize: "1.3em",
-          // }}
+          style={{
+            top: h1Ref.current
+              ? h1Ref.current.clientHeight +
+                finalSize +
+                window.visualViewport.height * 0.03
+              : 0,
+            // width: "0px",
+            // border: "solid 1px transparent",
+            // fontSize: "1.3em",
+          }}
           //className={roomFormAnimate === "room-form-start" ? "" : "expand"}
           type="text"
           placeholder="Type your message here"
