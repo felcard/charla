@@ -9,12 +9,17 @@
   margin: 0px;
   padding: 0px;
 }
+html,
+body {
+  overflow: hidden -moz-hidden-unscrollable;
+  overscroll-behavior: none;
+  touch-action: none;
+}
 ::-webkit-scrollbar {
   display: none;
 }
 body {
   background: rgb(26, 21, 2);
-  overflow: hidden;
 }
 #cont {
   color: rgb(126, 23, 23);
