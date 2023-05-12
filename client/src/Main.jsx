@@ -173,7 +173,7 @@ export default function Main() {
         window.visualViewport.height -
           h1Ref.current?.clientHeight -
           chatRef.current?.clientHeight -
-          window.visualViewport.height * 0.03
+          window.visualViewport.height * 0.1
       );
     };
     window.addEventListener("resize", screenResizer);
@@ -189,12 +189,15 @@ export default function Main() {
       window.visualViewport.height -
         h1Ref.current?.clientHeight -
         chatRef.current?.clientHeight -
-        window.visualViewport.height * 0.03
+        window.visualViewport.height * 0.1
     );
     inFocusRef.current.focus();
   };
   return (
     <div id="cont">
+      <div id="face" style={{ display: finalSize === 0 ? "block" : "none" }}>
+        pw
+      </div>
       <h1 ref={h1Ref}>{roomTitle}</h1>
       <div id="nav">
         <div
@@ -235,7 +238,7 @@ export default function Main() {
         style={{
           //marginTop equals the height of the title plus 1vh (window.innerHeight * 0.01) which is the title's top margin
           marginTop: h1Ref.current
-            ? h1Ref.current.clientHeight + window.visualViewport.height * 0.01
+            ? h1Ref.current.clientHeight + window.visualViewport.height * 0.08
             : 0,
           overflowY: "auto",
           scrollBehavior: "smooth",
@@ -277,7 +280,7 @@ export default function Main() {
             finalSize !== 0
               ? h1Ref.current.clientHeight +
                 finalSize +
-                window.visualViewport.height * 0.02
+                window.visualViewport.height * 0.09
               : window.visualViewport.height - 30,
           visibility: "hidden",
           //we take 2px off the width to account for borders since
