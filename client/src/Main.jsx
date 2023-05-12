@@ -32,6 +32,8 @@ export default function Main() {
   //focus cursor on chant input box
   const inFocusRef = useRef(null);
 
+  const faceRef = useRef(null);
+
   //when the browser is refreshed by the user, the react component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener is, to obtain the value from sessionStorage, the current value of sessionStorage will be stored. When the user enter the new room details via the submithandler, and thsese replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect, then we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listener which is undesireable. The solution is to wrap the variable in a useRef to be able to use the variable inside the useEffect without needing to make it a dependency. When the browser is refreshed the component re-mounted and the component function re-render the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and as a dependency, we use the roomTitle variable which causes a re-render only once after the user submits room details and the title of the app gets epdated.
 
   const localUser = useRef(null);
@@ -182,6 +184,15 @@ export default function Main() {
   }, []);
   //onExpandAnimationEnd listens for the end of the final animation so the elements ar
   //all in place and we can calculate their sizes correctly
+  ////////////////////face animation logic///////////
+  let animationActive = false;
+  const intervalId = setInterval(() => {
+    animationActive
+      ? (faceRef.current.style.animationPlayState = "running")
+      : (faceRef.current.style.animationPlayState = "paused");
+    animationActive = !animationActive;
+  }, 200);
+  /////////////////////////////////////////////////////
   const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
@@ -192,13 +203,22 @@ export default function Main() {
         window.visualViewport.height * 0.1
     );
     inFocusRef.current.focus();
+    clearInterval(intervalId); //clear interval for face animation
   };
   return (
     <div id="cont">
-      <div id="face" style={{ display: finalSize === 0 ? "block" : "none" }}>
-        pw
+      <div id="mask">
+        <span
+          id="face"
+          ref={faceRef}
+          style={{ display: finalSize === 0 ? "block" : "none" }}
+        >
+          pw
+        </span>
       </div>
-      <h1 ref={h1Ref}>{roomTitle}</h1>
+      <h1 className="unselect" ref={h1Ref}>
+        {roomTitle}
+      </h1>
       <div id="nav">
         <div
           id="room-form-cont"

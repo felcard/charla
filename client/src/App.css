@@ -31,6 +31,12 @@ input {
   border-image: linear-gradient(90deg, #f954ff, #00ffff) 1;
   border-image-slice: 1;
 }
+.unselect {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
 #cont {
   color: rgb(126, 23, 23);
   width: 100vw;
@@ -52,8 +58,6 @@ h1 {
   left: 50%;
   transform: translateX(-50%);
   font-family: titulo;
-  /* color: rgb(98, 211, 70);
-  text-shadow: 0px 0px 15px rgb(224, 124, 255); */
   background: linear-gradient(180deg, #ff00ff, #00ffff);
   -webkit-background-clip: text;
   background-clip: text;
@@ -157,21 +161,67 @@ button {
   }
 }
 
-#face {
-  text-align: center;
-  font-family: cara;
-  font-size: 15em;
-  letter-spacing: 0.2em;
-  padding-left: 0.2em;
+#mask {
   position: fixed;
   left: 50%;
   top: 50%;
   transform: translateX(-50%);
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+  10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+  30% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+  70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+  }
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+  90% {
+    transform: translate(1px, 2px) rotate(0deg);
+  }
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+
+#face {
+  /* due to animation element wont accept inline class */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+  /* ////////////////////////////////////////////////// */
+  text-align: center;
+  font-family: cara;
+  font-size: 15em;
+  letter-spacing: 0.2em;
+  padding-left: 0.1em;
   background: linear-gradient(90deg, #ff00ff, #00ffff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: lighter;
+  animation: shake 0.5s ease-in-out infinite;
 }
 
 @media screen and (max-aspect-ratio: 1/1) {
@@ -195,7 +245,5 @@ button {
   #face {
     width: 100%;
     font-size: 10em;
-    letter-spacing: 0.1em;
-    padding-left: 0.1em;
   }
 }
