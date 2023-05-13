@@ -28,3 +28,16 @@ export const isRude = (rudeWords, userInput) => {
     }
     return result;
 };
+
+export const abcRandom = (str = '') => {
+    if (str.length >= 2) return str;
+    const ran0to25 = Math.floor(Math.random() * 25);
+    const ran65to90 = ran0to25 + 65;
+    let ranChar = String.fromCharCode(ran65to90);
+    if (str.length > 0 && str[0] !== ranChar) {
+        str += ranChar;
+        return abcRandom(str);
+    } else {
+        return abcRandom(ranChar);
+    };
+};

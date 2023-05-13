@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef } from "react";
-import { fonts, color, isRude } from "./tools/fx";
+import { fonts, color, isRude, abcRandom } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
 const audio = new Audio(soundFile);
@@ -213,7 +213,7 @@ export default function Main() {
           ref={faceRef}
           style={{ display: finalSize === 0 ? "block" : "none" }}
         >
-          pw
+          {abcRandom()}
         </span>
       </div>
       <h1 className="unselect" ref={h1Ref}>
