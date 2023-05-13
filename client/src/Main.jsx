@@ -24,8 +24,8 @@ export default function Main() {
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
   const [plugged, setPlugged] = useState(true);
-
-  const [notification, setNotification] = useState(Notification.permission);
+  //notification permision not needed for just playing sound on user submitting messages
+  //const [notification, setNotification] = useState(Notification.permission);
   //for calculating the size of the messages area
   const h1Ref = useRef(null);
   const chatRef = useRef(null);
@@ -52,7 +52,8 @@ export default function Main() {
       //msg sound notification logic
       if (data?.user) {
         if (
-          notification === "granted" &&
+          //only in cases where using push notifications not for user interaction real time sound notification
+          //notification === "granted" &&
           localUser.current?.user !== data.user
         ) {
           audio.currentTime = 0;
@@ -93,11 +94,11 @@ export default function Main() {
   useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then((permission) => {
-        setNotification(permission);
-      });
-    }
+    // if (Notification.permission !== "granted") {
+    //   Notification.requestPermission().then((permission) => {
+    //     setNotification(permission);
+    //   });
+    // }
     //socket listeners need to be in a useEffect so they are only declared once, otherwise we get multiple listeners listening for the same event resulting in double actions like rendering messages two times
 
     socketListeners.current(socket, "message", "room", "joined");
@@ -108,8 +109,8 @@ export default function Main() {
       //we use socket.offAny() to remove all listeners and this method work when listeners are anonymous functions but if we wanted to individually remove listeners we would need to use NAMED functions
       socket.removeAllListeners();
       socket.disconnect();
-    };
-  }, [notification]);
+    }; //when using push notifications 'notification variable' needs to go in the dep array
+  }, []);
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
