@@ -184,16 +184,21 @@ export default function Main() {
   }, []);
   //onExpandAnimationEnd listens for the end of the final animation so the elements ar
   //all in place and we can calculate their sizes correctly
-  ////////////////////face animation logic///////////
-  let animationActive = false;
-  const intervalId = setInterval(() => {
-    animationActive
-      ? (faceRef.current.style.animationPlayState = "running")
-      : (faceRef.current.style.animationPlayState = "paused");
-    animationActive = !animationActive;
-    faceRef.current.textContent = abcRandom();
-  }, 400);
-  /////////////////////////////////////////////////////
+
+  useEffect(() => {
+    ////////////////////face animation logic///////////
+    let animationActive = false;
+    const intervalId = setInterval(() => {
+      animationActive
+        ? (faceRef.current.style.animationPlayState = "running")
+        : (faceRef.current.style.animationPlayState = "paused");
+      animationActive = !animationActive;
+      faceRef.current.textContent = abcRandom();
+    }, 400);
+    /////////////////////////////////////////////////////
+    return () => clearInterval(intervalId); //clear interval for face animation
+  });
+
   const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
@@ -204,7 +209,6 @@ export default function Main() {
         window.visualViewport.height * 0.1
     );
     inFocusRef.current.focus();
-    clearInterval(intervalId); //clear interval for face animation
   };
   return (
     <div id="cont">
