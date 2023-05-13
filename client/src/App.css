@@ -216,7 +216,7 @@ button {
   font-size: 15em;
   letter-spacing: 0.2em;
   padding-left: 0.1em;
-  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  background: linear-gradient(90deg, #00e7dc, #ff00ff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

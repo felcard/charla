@@ -191,7 +191,8 @@ export default function Main() {
       ? (faceRef.current.style.animationPlayState = "running")
       : (faceRef.current.style.animationPlayState = "paused");
     animationActive = !animationActive;
-  }, 200);
+    faceRef.current.textContent = abcRandom();
+  }, 400);
   /////////////////////////////////////////////////////
   const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
@@ -213,7 +214,7 @@ export default function Main() {
           ref={faceRef}
           style={{ display: finalSize === 0 ? "block" : "none" }}
         >
-          {abcRandom()}
+          pw
         </span>
       </div>
       <h1 className="unselect" ref={h1Ref}>
