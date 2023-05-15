@@ -217,7 +217,10 @@ export default function Main() {
         <span
           id="face"
           ref={faceRef}
-          style={{ display: finalSize === 0 ? "block" : "none" }}
+          style={{
+            display:
+              roomFormAnimate !== "room-form-disappear" ? "block" : "none",
+          }}
         >
           pw
         </span>
@@ -307,7 +310,7 @@ export default function Main() {
               ? h1Ref.current.clientHeight +
                 finalSize +
                 window.visualViewport.height * 0.09
-              : window.visualViewport.height - 30,
+              : window.visualViewport.height - 40,
           visibility: "hidden",
           //we take 2px off the width to account for borders since
           //100vw on its own does not include borders so if we set
