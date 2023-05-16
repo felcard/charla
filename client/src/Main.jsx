@@ -24,6 +24,7 @@ export default function Main() {
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
   const [plugged, setPlugged] = useState(true);
+  const [faceRefLoaded, setFaceRefLoaded] = useState(false);
   //notification permision not needed for just playing sound on user submitting messages
   //const [notification, setNotification] = useState(Notification.permission);
   //for calculating the size of the messages area
@@ -188,24 +189,26 @@ export default function Main() {
   //all in place and we can calculate their sizes correctly
 
   useEffect(() => {
-    ////////////////////face animation logic///////////
-    let animationActive = false;
-    const fontLoaded = window
-      .getComputedStyle(faceRef.current)
-      .getPropertyValue("font-family"); //check if font style has loaded
-    const intervalId = setInterval(() => {
-      animationActive
-        ? (faceRef.current.style.animationPlayState = "running")
-        : (faceRef.current.style.animationPlayState = "paused");
-      animationActive = !animationActive;
-      if (fontLoaded.includes("cara")) {
-        //if font is loaded then execute the code
-        faceRef.current.textContent = abcRandom();
-      }
-    }, 400);
-    /////////////////////////////////////////////////////
-    return () => clearInterval(intervalId); //clear interval for face animation
-  });
+    if (faceRefLoaded) {
+      ////////////////////face animation logic///////////
+      let animationActive = false;
+      const fontLoaded = window
+        .getComputedStyle(faceRef.current)
+        .getPropertyValue("font-family"); //check if font style has loaded
+      const intervalId = setInterval(() => {
+        animationActive
+          ? (faceRef.current.style.animationPlayState = "running")
+          : (faceRef.current.style.animationPlayState = "paused");
+        animationActive = !animationActive;
+        if (fontLoaded.includes("cara")) {
+          //if font is loaded then execute the code
+          faceRef.current.textContent = abcRandom();
+        }
+      }, 400);
+      /////////////////////////////////////////////////////
+      return () => clearInterval(intervalId); //clear interval for face animation
+    }
+  }, [faceRefLoaded]);
 
   const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
@@ -218,6 +221,10 @@ export default function Main() {
     );
     inFocusRef.current.focus();
   };
+  useEffect(() => {
+    setFaceRefLoaded(true);
+    //when the javascript (including useEffect blocks) are first loaded all the useRef's .current will be undefined since the comnponent hasn't rendered any html yet so this useEffect is a flag that will run after the javascript have loaded and the component redered for the first time guaranteing that there will no be udefined errors. So in the useEffect blocks where useRef elements are used we add as dependency the flag so there is a second rendered where useRef elements would be usable/defined. NOT SURE Whether this approach is the best?????
+  }, []);
   return (
     <div id="cont">
       <div id="mask">
