@@ -115,7 +115,8 @@ export default function Main() {
   const handleMsgSubmit = (event) => {
     event.preventDefault();
     //if cocket disconnects plugged turns 'false' and room details stored in session storage are sent to the server to re-join the room
-    if (!plugged) {
+    //also use the value of finalSize for cases where state resets but the component does not re-render; thogh not sure if this error can ever occur???
+    if (!plugged || finalSize === 0) {
       socket.connect();
       //on disconnection the socket listeners need to be removed to avoid re-connecting and having the listener listen to two connections. So if the listeners are removed thery need to be re-declared on re-connection so the new connection have listeners and hence the socketListeners function re attaches listener to the new connection
       socketListeners.current(socket, "message", "room", "joined");
@@ -189,12 +190,18 @@ export default function Main() {
   useEffect(() => {
     ////////////////////face animation logic///////////
     let animationActive = false;
+    const fontLoaded = window
+      .getComputedStyle(faceRef.current)
+      .getPropertyValue("font-family"); //check if font style has loaded
     const intervalId = setInterval(() => {
       animationActive
         ? (faceRef.current.style.animationPlayState = "running")
         : (faceRef.current.style.animationPlayState = "paused");
       animationActive = !animationActive;
-      faceRef.current.textContent = abcRandom();
+      if (fontLoaded.includes("cara")) {
+        //if font is loaded then execute the code
+        faceRef.current.textContent = abcRandom();
+      }
     }, 400);
     /////////////////////////////////////////////////////
     return () => clearInterval(intervalId); //clear interval for face animation
@@ -221,9 +228,7 @@ export default function Main() {
             display:
               roomFormAnimate !== "room-form-disappear" ? "block" : "none",
           }}
-        >
-          pw
-        </span>
+        ></span>
       </div>
       <h1 className="unselect" ref={h1Ref}>
         {roomTitle}
@@ -339,6 +344,14 @@ export default function Main() {
           onChange={(e) => setInputValue(e.target.value)}
         />
       </form>
+      <section
+        id="author"
+        style={{
+          display: roomFormAnimate !== "room-form-disappear" ? "block" : "none",
+        }}
+      >
+        by fel NC
+      </section>
     </div>
   );
 }

@@ -1,12 +1,12 @@
 @font-face {
-  font-family: "titulo";
+  font-family: titulo;
   src: url("./tools/fonts/Cube.woff2") format("woff2");
   /* url("./tools/neonize.woff") format("woff"); */
   /* Add additional font formats if available */
   /* Specify font-weight and font-style if desired */
 }
 @font-face {
-  font-family: "cara";
+  font-family: cara;
   src: url("./tools/fonts/FACE_ALIN.woff2") format("woff2");
 }
 * {
@@ -222,6 +222,37 @@ button {
   -webkit-text-fill-color: transparent;
   font-weight: lighter;
   animation: shake 0.5s ease-in-out infinite;
+}
+
+#author {
+  position: fixed;
+  color: rgb(110, 28, 204);
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: space mono;
+}
+
+#load-animation {
+  position: fixed;
+  left: 1.6em;
+  top: 1.6em;
+  color: rgb(110, 28, 204);
+  font-family: cara;
+  animation: loading 1s ease infinite;
+}
+@keyframes loading {
+  0% {
+    transform: rotate(0deg) scale(0);
+    transform-origin: center;
+  }
+  50% {
+    transform: rotate(360deg) scale(4);
+  }
+  100% {
+    transform: rotate(0deg) scale(0);
+    transform-origin: center;
+  }
 }
 
 @media screen and (max-aspect-ratio: 1/1) {
