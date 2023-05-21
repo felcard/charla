@@ -224,6 +224,22 @@ button {
   animation: shake 0.5s ease-in-out infinite;
 }
 
+.user-face {
+  font-family: cara;
+  font-size: 2rem;
+  background: linear-gradient(
+    180deg,
+    #04c4ff,
+    #ffffff,
+    #ffe600,
+    #ffffff,
+    #04c4ff
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 #author {
   position: fixed;
   color: rgb(110, 28, 204);
