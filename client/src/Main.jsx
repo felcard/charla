@@ -43,8 +43,6 @@ export default function Main() {
     localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"));
   }, [roomTitle]);
 
-  const time = new Date();
-
   useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
@@ -76,12 +74,17 @@ export default function Main() {
       //if server sends keyword in a message means the user left
       const userGone = data.msg === "k@t@n@";
       setMessages((prevMessages) => {
+        const time = new Date();
         const socketMsg = {
           text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
           user: data.user,
           font: userGone ? "Space Mono" : fonts(),
           msgColor: userGone ? "magenta" : color(),
           userColor: userGone ? "magenta" : color(),
+          time: ` ${time.getHours()}:${time
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}`,
         };
         return [socketMsg, ...prevMessages];
       });
@@ -310,10 +313,9 @@ export default function Main() {
                   fontSize: "0.7rem",
                   color: "silver",
                 }}
-              >{` ${time.getHours()}:${time
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}`}</span>
+              >
+                {msg.time}
+              </span>
             </div>
           );
         })}
