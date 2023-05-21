@@ -9,6 +9,10 @@
   font-family: cara;
   src: url("./tools/fonts/FACE_ALIN.woff2") format("woff2");
 }
+@font-face {
+  font-family: user;
+  src: url("./tools/fonts/Alin_Square_Emoji.woff2") format("woff2");
+}
 * {
   margin: 0px;
   padding: 0px;
@@ -225,19 +229,9 @@ button {
 }
 
 .user-face {
-  font-family: cara;
+  font-family: user;
   font-size: 2rem;
-  background: linear-gradient(
-    180deg,
-    #04c4ff,
-    #ffffff,
-    #ffe600,
-    #ffffff,
-    #04c4ff
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
 }
 
 #author {

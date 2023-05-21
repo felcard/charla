@@ -14,9 +14,12 @@ const socket = io("socket-fel.koyeb.app/", {
 //So even though the socket instance remains the same, the underlying connection is a new connection with a new socket ID. Any listeners registered on the socket instance before the disconnection will still be active on the new connection, and any new listeners registered on the socket instance after the reconnection will only be active on the new connection.
 //SO ensure listeners are declared only once and removed (socket.off) before declaring them again. Ideally placed in a useEffect that only runs once when the component mounts
 
-function userFacify() {
+function letterForUser() {
+  //use closure for the alphabet array and the user names object
   const arr = "abcdefghijklmnopqrstuvwxyz".split("");
   const users = {};
+  //return a function that generates a unique letter for each new user
+  //when an existent user name is given the same letter is returned
   return function (user) {
     if (users[user]) {
       return users[user].toUpperCase();
@@ -29,7 +32,7 @@ function userFacify() {
   };
 }
 
-const makeFace = userFacify();
+const makeFace = letterForUser();
 
 export default function Main() {
   const [roomTitle, setRoomTitle] = useState("CHARLA");
