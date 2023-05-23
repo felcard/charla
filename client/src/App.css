@@ -4,14 +4,17 @@
   /* url("./tools/neonize.woff") format("woff"); */
   /* Add additional font formats if available */
   /* Specify font-weight and font-style if desired */
+  font-display: block;
 }
 @font-face {
   font-family: cara;
   src: url("./tools/fonts/FACE_ALIN.woff2") format("woff2");
+  font-display: block;
 }
 @font-face {
   font-family: user;
   src: url("./tools/fonts/Alin_Square_Emoji.woff2") format("woff2");
+  font-display: block;
 }
 * {
   margin: 0px;
