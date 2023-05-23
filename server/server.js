@@ -20,10 +20,10 @@ io.on('connection', (socket) => {
                 console.log(`user: ${socket.id} sent a message`);
                 io.to(room.name).emit('message', { msg: data, user: room.user });
             });
-            socket.on('disconnect', () => {
+            socket.on('disconnecting', () => {
                 io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
-                socket.offAny();
+                //socket.removeAllListeners();//check if this will remove also the main io connection listener??
             });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
@@ -35,10 +35,10 @@ io.on('connection', (socket) => {
                     console.log(`user: ${socket.id} sent a message`);
                     io.to(room.name).emit('message', { msg: data, user: room.user });
                 });
-                socket.on('disconnect', () => {
+                socket.on('disconnecting', () => {
                     io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
-                    socket.offAny();
+                    //socket.removeAllListeners();
                 });
             } else {
                 socket.emit('room', 'ROOM TAKEN');
@@ -46,6 +46,21 @@ io.on('connection', (socket) => {
         }
     });
     //this listens for disconnection event from a socket that has not joind a room, whereas the other two inside if or else block will listen those two different socket paths
+
+    // socket.on('disconnecting', () => {
+    //     //very usefull so it listens to the socket when it starts to disconnect
+    //     //but hasnt fukky disconnected yet so it gives time to run some logic before
+    //     //socket.on('disconnect') happens
+    //     //'disconnecting' event may be usefull to check when a client loses internet connection and 
+    //     //gets removed from a room but the socket connection is not fully disconnected
+    //     if ([...socket.rooms][1]) {//this is the second argument of a javascript set
+    //         //returns by the socket.rooms method, where the second element is the room
+    //         //the socket belongs to...not sure if it was joined to several rooms
+    //         console.log('socket was in room: ', [...socket.rooms][1]);
+    //     } else {
+    //         console.log('socket did not join any room');
+    //     }
+    // });
     socket.on('disconnect', () => {
         console.log(`user: ${socket.id} DISCONNECTED`);
     });
