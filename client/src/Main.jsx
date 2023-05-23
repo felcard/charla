@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef } from "react";
-import { fonts, color, isRude, abcRandom } from "./tools/fx";
+import { fonts, color, isRude, abcRandom, makeFace } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
 const audio = new Audio(soundFile);
@@ -13,26 +13,6 @@ const socket = io("socket-fel.koyeb.app/", {
 //When you create a new socket instance using the io() constructor, the instance establishes a connection to the server and is assigned a unique socket ID. If the connection is lost, and you reconnect to the same server using the same socket instance, a new connection with a different socket ID will be established.
 //So even though the socket instance remains the same, the underlying connection is a new connection with a new socket ID. Any listeners registered on the socket instance before the disconnection will still be active on the new connection, and any new listeners registered on the socket instance after the reconnection will only be active on the new connection.
 //SO ensure listeners are declared only once and removed (socket.off) before declaring them again. Ideally placed in a useEffect that only runs once when the component mounts
-
-function letterForUser() {
-  //use closure for the alphabet array and the user names object
-  const arr = "abcdefghijklmnopqrstuvwxyz".split("");
-  const users = {};
-  //return a function that generates a unique letter for each new user
-  //when an existent user name is given the same letter is returned
-  return function (user) {
-    if (users[user]) {
-      return users[user].toUpperCase();
-    } else {
-      const arrEl = arr[Math.floor(Math.random() * arr.length)];
-      arr.splice(arr.indexOf(arrEl), 1);
-      users[user] = arrEl;
-      return users[user].toUpperCase();
-    }
-  };
-}
-
-const makeFace = letterForUser();
 
 export default function Main() {
   const [roomTitle, setRoomTitle] = useState("CHARLA");
@@ -115,6 +95,18 @@ export default function Main() {
       //IF USING socket.removeAllListeners(); it also removes the error listeners so they need to be added again other option is to remove all listeners individually
     });
     socket.on("disconnect", () => {
+      setMessages((currMsgs) => {
+        return [
+          {
+            text: "🏃💨DISCONNECTED🏃💨",
+            user: localUser.current.user,
+            font: "space mono",
+            msgColor: "magenta",
+            userColor: "magenta",
+          },
+          ...currMsgs,
+        ];
+      });
       console.log("DISCONNECTED");
       setPlugged(false);
       //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' + 'connect_error' approach seems to work better
