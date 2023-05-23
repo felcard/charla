@@ -41,3 +41,23 @@ export const abcRandom = (str = '') => {
         return abcRandom(ranChar);
     };
 };
+
+function makeLetterGenerator() {
+    //use closure for the alphabet array and the user names object
+    const arr = "abcdefghijklmnopqrstuvwxyz".split("");
+    const users = {};
+    //return a function that generates a unique letter for each new user
+    //when an existent user name is given the same letter is returned
+    return function (user) {
+        if (users[user]) {
+            return users[user].toUpperCase();
+        } else {
+            const arrEl = arr[Math.floor(Math.random() * arr.length)];
+            arr.splice(arr.indexOf(arrEl), 1);
+            users[user] = arrEl;
+            return users[user].toUpperCase();
+        }
+    };
+}
+
+export const makeFace = makeLetterGenerator();
