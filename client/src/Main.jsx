@@ -1,6 +1,6 @@
 import io from "socket.io-client";
 import React, { useState, useEffect, useRef } from "react";
-import { fonts, color, isRude, abcRandom, makeFace } from "./tools/fx";
+import { isRude, abcRandom, makeFace, fontColor } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
 const audio = new Audio(soundFile);
@@ -23,7 +23,7 @@ export default function Main() {
   const [inputCode, setInputCode] = useState("");
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
-  const [plugged, setPlugged] = useState(true);
+  //const [plugged, setPlugged] = useState(true);
   const [faceRefLoaded, setFaceRefLoaded] = useState(false);
   //notification permision not needed for just playing sound on user submitting messages
   //const [notification, setNotification] = useState(Notification.permission);
@@ -44,6 +44,7 @@ export default function Main() {
   }, [roomTitle]);
 
   useEffect(() => {
+    sessionStorage.clear();
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
     // if (Notification.permission !== "granted") {
@@ -52,6 +53,16 @@ export default function Main() {
     //   });
     // }
     //socket listeners need to be in a useEffect so they are only declared once, otherwise we get multiple listeners listening for the same event resulting in double actions like rendering messages two times
+    socket.on("connect", () => {
+      if (localUser.current) {
+        socket.emit("room", {
+          //coalescing operator (??) assigns empty string if keys null or undefined.
+          user: localUser.current.user ?? "",
+          name: localUser.current.name.toLowerCase() ?? "",
+          code: localUser.current.code ?? "",
+        });
+      }
+    });
 
     socket.on("room", (msg) => {
       console.log("Message from server => ", msg);
@@ -78,9 +89,9 @@ export default function Main() {
         const socketMsg = {
           text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
           user: data.user,
-          font: userGone ? "Space Mono" : fonts(),
-          msgColor: userGone ? "magenta" : color(),
-          userColor: userGone ? "magenta" : color(),
+          font: userGone ? "Space Mono" : fontColor(data.user).font,
+          msgColor: userGone ? "magenta" : fontColor(data.user).color,
+          userColor: userGone ? "magenta" : fontColor(data.user).color,
           time: ` ${time.getHours()}:${time
             .getMinutes()
             .toString()
@@ -96,19 +107,25 @@ export default function Main() {
     });
     socket.on("disconnect", () => {
       setMessages((currMsgs) => {
-        return [
-          {
-            text: "🏃💨DISCONNECTED🏃💨",
-            user: localUser.current.user,
-            font: "space mono",
-            msgColor: "magenta",
-            userColor: "magenta",
-          },
-          ...currMsgs,
-        ];
+        console.log(currMsgs[0]?.text);
+        if (currMsgs.length && currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") {
+          console.log("PASO!!");
+          return [
+            {
+              text: "🏃💨DISCONNECTED🏃💨",
+              user: localUser.current?.user,
+              font: "space mono",
+              msgColor: "magenta",
+              userColor: "magenta",
+            },
+            ...currMsgs,
+          ];
+        } else {
+          return currMsgs;
+        }
       });
       console.log("DISCONNECTED");
-      setPlugged(false);
+      //setPlugged(false);
       //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' + 'connect_error' approach seems to work better
     });
     ////////////////////////NOTE/////////////////
@@ -129,18 +146,18 @@ export default function Main() {
     event.preventDefault();
     //if socket disconnects plugged turns 'false' room details stored in session storage are sent to the server to re-join the room
     //also use the value of finalSize for cases where state resets but the component does not re-render; thogh not sure if this error can ever occur???
-    if (!plugged || finalSize === 0) {
-      //socket.connect();//this is not needed since socket.io will periodically attempt to re-connect. Room re-joining does not happen automatically socket.connect() needs to be used when the socket is manually disconnected using socket.disconnect() since in this case socket.io won't attempt to re-connect after
-      console.log("RE-CONNECTING ");
-      //re-joining the room logic will stay on the buffer untill connection is re-established since when the socket disconnected, it was removed from any room it belonged to.
-      socket.emit("room", {
-        //coalescing operator (??) assigns empty string if keys null or undefined.
-        user: localUser.current.user ?? "",
-        name: localUser.current.name.toLowerCase() ?? "",
-        code: localUser.current.code ?? "",
-      });
-      setPlugged(true);
-    }
+    // if (!plugged || finalSize === 0) {
+    //   //socket.connect();//this is not needed since socket.io will periodically attempt to re-connect. Room re-joining does not happen automatically socket.connect() needs to be used when the socket is manually disconnected using socket.disconnect() since in this case socket.io won't attempt to re-connect after
+    //   console.log("RE-CONNECTING ");
+    //   //re-joining the room logic will stay on the buffer untill connection is re-established since when the socket disconnected, it was removed from any room it belonged to.
+    //   socket.emit("room", {
+    //     //coalescing operator (??) assigns empty string if keys null or undefined.
+    //     user: localUser.current.user ?? "",
+    //     name: localUser.current.name.toLowerCase() ?? "",
+    //     code: localUser.current.code ?? "",
+    //   });
+    //   setPlugged(true);
+    // }
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
       alert("Unaccepted word found! - Contiene palabra invalida!");
