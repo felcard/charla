@@ -1,4 +1,4 @@
-export const fonts = () => {
+const makeUserColorAndFont = () => {
     const fontArr = [
         "Rancho",
         "Lakki Reddy",
@@ -9,13 +9,20 @@ export const fonts = () => {
         "Righteous",
         "Space Mono",
     ];
-    const fontInd = Math.floor(Math.random() * 7);
-    return fontArr[fontInd];
+    const users = {};
+    return function (user) {
+        if (users[user]) {
+            return users[user];
+        } else {
+            const userColor = `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`;
+            const fontInd = Math.floor(Math.random() * 7.99);
+            const userFont = fontArr[fontInd];
+            users[user] = { color: userColor, font: userFont };
+            return users[user];
+        }
+    };
 };
-
-export const color = () => {
-    return `hsl(${Math.floor(Math.random() * 359)}, 100%, 60%)`;
-};
+export const fontColor = makeUserColorAndFont();
 
 export const isRude = (rudeWords, userInput) => {
     const rudeArr = rudeWords.split(",");
