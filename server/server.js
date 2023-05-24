@@ -7,10 +7,13 @@ const io = new Server(server, {
     //pingTimeout: 120000,
 });
 
+const guests = {};
+
 io.on('connection', (socket) => {
     console.log(`user: ${socket.id} connected to MAIN`);
     socket.on('room', room => {
         if (!io.sockets.adapter.rooms.has(room.name)) {
+            guests[room.user] = (guests[room.user] || 0) + 1;
             socket.emit('room', `room created: ${room.name}`);
             socket.join(room.name);
             socket.emit('joined', 'joined room');
@@ -21,13 +24,20 @@ io.on('connection', (socket) => {
                 io.to(room.name).emit('message', { msg: data, user: room.user });
             });
             socket.on('disconnecting', () => {
-                io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                //this avoids sending delayed disconnected message after the user has re-joined
+                if (guests[room.user] === 1) {
+                    io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                    delete guests[room.user];
+                } else {
+                    guests[room.user] = -1;
+                }
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
                 //socket.removeAllListeners();//check if this will remove also the main io connection listener??
             });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
             if (room.code === roomData.data.code) {
+                guests[room.user] = (guests[room.user] || 0) + 1;
                 socket.join(roomData.data.name);
                 console.log(`user: ${socket.id} joined room`);
                 io.to(room.name).emit('message', { msg: ' IS IN THE ROOM 👋', user: room.user });
@@ -36,7 +46,12 @@ io.on('connection', (socket) => {
                     io.to(room.name).emit('message', { msg: data, user: room.user });
                 });
                 socket.on('disconnecting', () => {
-                    io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                    if (guests[room.user] === 1) {
+                        io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
+                        delete guests[room.user];
+                    } else {
+                        guests[room.user] = -1;
+                    }
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
                     //socket.removeAllListeners();
                 });
