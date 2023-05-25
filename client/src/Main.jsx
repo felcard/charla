@@ -260,7 +260,13 @@ export default function Main() {
   }, []);
   return (
     <div id="cont">
-      <span style={{ display: "none", fontFamily: "user" }}>
+      <span
+        style={{
+          visibility: "hidden",
+          fontFamily: "user",
+          position: "absolute",
+        }}
+      >
         font-invisible-preLoader
       </span>
       <div id="mask">
