@@ -31,7 +31,6 @@ io.on('connection', (socket) => {
                     guests[room.user] = -1;
                 }
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
-                socket.removeAllListeners();//check if this will remove also the main io connection listener??
             });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
@@ -52,7 +51,6 @@ io.on('connection', (socket) => {
                         guests[room.user] = -1;
                     }
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
-                    socket.removeAllListeners();
                 });
             } else {
                 socket.emit('room', 'ROOM TAKEN');
