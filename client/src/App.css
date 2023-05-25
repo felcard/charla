@@ -4,13 +4,12 @@
   /* url("./tools/neonize.woff") format("woff"); */
   /* Add additional font formats if available */
   /* Specify font-weight and font-style if desired */
-  font-display: block;
-  /* font-display:block will display nothing until the font is loaded. The option 'swap' is used to display a default font while the custom font loads */
 }
 @font-face {
   font-family: cara;
   src: url("./tools/fonts/FACE_ALIN.woff2") format("woff2");
   font-display: block;
+  /* font-display:block will display nothing until the font is loaded. The option 'swap' is used to display a default font while the custom font loads */
 }
 @font-face {
   font-family: user;
