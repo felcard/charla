@@ -7,9 +7,8 @@ const io = new Server(server, {
     //pingTimeout: 120000,
 });
 
-const guests = {};
-
 io.on('connection', (socket) => {
+    const guests = {};
     console.log(`user: ${socket.id} connected to MAIN`);
     socket.on('room', room => {
         if (!io.sockets.adapter.rooms.has(room.name)) {
@@ -32,7 +31,7 @@ io.on('connection', (socket) => {
                     guests[room.user] = -1;
                 }
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
-                //socket.removeAllListeners();//check if this will remove also the main io connection listener??
+                socket.removeAllListeners();//check if this will remove also the main io connection listener??
             });
         } else {
             const roomData = io.sockets.adapter.rooms.get(room.name);
@@ -53,7 +52,7 @@ io.on('connection', (socket) => {
                         guests[room.user] = -1;
                     }
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
-                    //socket.removeAllListeners();
+                    socket.removeAllListeners();
                 });
             } else {
                 socket.emit('room', 'ROOM TAKEN');
