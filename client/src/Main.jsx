@@ -42,9 +42,12 @@ export default function Main() {
   useEffect(() => {
     localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"));
   }, [roomTitle]);
-
+  //this useEffect clears the sessionStorage when is browser is refreshed
   useEffect(() => {
     sessionStorage.clear();
+  }, []);
+
+  useEffect(() => {
     //request permition if haven't been granted
     //notification once granted by the client's browser it will remain active fo a long period until the user will have to re-grant at some point
     // if (Notification.permission !== "granted") {
@@ -53,6 +56,8 @@ export default function Main() {
     //   });
     // }
     //socket listeners need to be in a useEffect so they are only declared once, otherwise we get multiple listeners listening for the same event resulting in double actions like rendering messages two times
+
+    //IMPORTANT: BE CAREFUL WITH NESTED SOCKET LISTENERS SINCE THE NESTED LISTENER WILL DUPLICATE EVERY TIME THE PARENT LISTENER TRIGGERS
     socket.on("connect", () => {
       if (localUser.current) {
         socket.emit("room", {
@@ -66,7 +71,9 @@ export default function Main() {
 
     socket.on("room", (msg) => {
       console.log("Message from server => ", msg);
-      socket.on("joined", (msg) => console.log(`user: ${socket.id} ${msg}`));
+    });
+    socket.on("joined", (msg) => {
+      console.log(`user: ${socket.id} ${msg}`);
     });
 
     socket.on("message", (data) => {
@@ -90,8 +97,7 @@ export default function Main() {
           text: userGone ? "🏃💨LEFT THE ROOM🏃💨" : data.msg,
           user: data.user,
           font: userGone ? "Space Mono" : fontColor(data.user).font,
-          msgColor: userGone ? "magenta" : fontColor(data.user).color,
-          userColor: userGone ? "magenta" : fontColor(data.user).color,
+          msgColor: userGone ? "magenta" : "",
           time: ` ${time.getHours()}:${time
             .getMinutes()
             .toString()
@@ -107,9 +113,7 @@ export default function Main() {
     });
     socket.on("disconnect", () => {
       setMessages((currMsgs) => {
-        console.log(currMsgs[0]?.text);
-        if (currMsgs.length && currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") {
-          console.log("PASO!!");
+        if (currMsgs.length || currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") {
           return [
             {
               text: "🏃💨DISCONNECTED🏃💨",
@@ -255,6 +259,9 @@ export default function Main() {
   }, []);
   return (
     <div id="cont">
+      <span style={{ display: "none", fontFamily: "user" }}>
+        font-invisible-preLoader
+      </span>
       <div id="mask">
         <span
           id="face"
@@ -281,6 +288,7 @@ export default function Main() {
               placeholder="enter your name"
               value={inputName}
               onChange={(e) => setInputName(e.target.value)}
+              autoFocus={true}
             />
             <br />
             <input
@@ -328,15 +336,21 @@ export default function Main() {
                 fontSize: msg.font === "Rancho" ? "2.5em" : "2em",
                 textAlign: "left",
                 textShadow: `${
-                  msg.msgColor === "magenta" ? "0px 0px 10px magenta" : ""
+                  msg.msgColor === "magenta"
+                    ? "0px 0px 5px magenta,0px 0px 10px magenta"
+                    : ""
                 }`,
               }}
               key={ind}
             >
               <span className="user-face">{makeFace(msg.user)}</span>
-              <span style={{ color: msg.userColor }}>{msg.user}: </span>
+              <span style={{ color: fontColor(msg.user).color }}>
+                {msg.user}:{" "}
+              </span>
               <br />
-              <span style={{ color: msg.msgColor }}>{msg.text}</span>
+              <span style={{ color: fontColor(msg.user).color }}>
+                {msg.text}
+              </span>
               <span
                 style={{
                   fontFamily: "space mono",
