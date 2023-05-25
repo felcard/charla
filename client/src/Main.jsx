@@ -114,7 +114,10 @@ export default function Main() {
     });
     socket.on("disconnect", () => {
       setMessages((currMsgs) => {
-        if (currMsgs.length || currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") {
+        if (
+          (!currMsgs.length || currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") &&
+          localUser.current
+        ) {
           return [
             {
               text: "🏃💨DISCONNECTED🏃💨",
