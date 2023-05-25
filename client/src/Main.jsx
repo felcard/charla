@@ -38,14 +38,15 @@ export default function Main() {
   //when the browser is refreshed by the user, the react component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener is, and stored the value from sessionStorage, the current value of sessionStorage would be stored. When the user enters new room details via the submithandler, and these replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect to use it inside, then we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listeners which is undesireable. The solution is to wrap the variable in a useRef outside the useEffect where it needs to be used without needing to make it a dependency. When the browser is refreshed, the component re-mounted and the component function re-renders the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and as a dependency, we use the roomTitle variable which causes a re-render only once after the user submits room details and the title of the app gets epdated.
   //we store the room details in sessionStorage instead of useState to implement a feature where the app will check if there are room setails in session storage and in case of user refreshing the page the chat will remain in view instead of starting all over from landing page
 
+  useEffect(() => {
+    sessionStorage.clear();
+  }, []);
+
   const localUser = useRef(null);
   useEffect(() => {
     localUser.current = JSON.parse(sessionStorage.getItem("sessionRoom"));
   }, [roomTitle]);
   //this useEffect clears the sessionStorage when is browser is refreshed
-  useEffect(() => {
-    sessionStorage.clear();
-  }, []);
 
   useEffect(() => {
     //request permition if haven't been granted
