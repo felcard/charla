@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
                     io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                     delete guests[room.user];
                 } else {
-                    guests[room.user] = -1;
+                    guests[room.user] -= 1;
                 }
                 console.log(`User: ${socket.id} disconnected from MAIN.`);
             });
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
                         io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
                         delete guests[room.user];
                     } else {
-                        guests[room.user] = -1;
+                        guests[room.user] -= 1;
                     }
                     console.log(`User: ${socket.id} disconnected from MAIN.`);
                 });
