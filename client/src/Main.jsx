@@ -185,16 +185,11 @@ export default function Main() {
           code: roomArr[2],
         })
       );
-      //we conditionally emit room details if the socket is not disconnected
-      //since if it is disconnected the this logic will still be buffered
-      //and wneh the socket re-gains connection this event will be in the queue and the user will be emiting room details twice: initially when room is first created, and secondly via the handleMsgSubmit since 'plugged' state will be false and room details will be emitted this time joining the room; resulting in the user having joined the room twice in the server getting the messages back two times!
-      if (!socket.disconnected) {
-        socket.emit("room", {
-          user: roomArr[0],
-          name: roomArr[1].toLowerCase(),
-          code: roomArr[2],
-        });
-      }
+      socket.emit("room", {
+        user: roomArr[0],
+        name: roomArr[1].toLowerCase(),
+        code: roomArr[2],
+      });
       setRoomTitle(inputRoom.toLowerCase());
       setRoomFormAnimate("main-room");
     }
