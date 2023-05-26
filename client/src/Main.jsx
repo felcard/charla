@@ -8,10 +8,10 @@ audio.load(); //for tests not sure if needed
 //socket-fel.koyeb.app/
 const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
-}); //When you create a socket object using the io() constructor, it automatically attempts to establish/initiate a connection to the server using the specified transport options. If the connection is successful, the 'connect' event is emitted, and you can listen for it using the socket.on() method.If the socket object is disconnected from the server, any subsequent calls to socket.emit() will not automatically start a new connection. Instead, the emit() method will try to send the data over the existing disconnected socket, which will result in an error. Socket.io will attempt to periodically re-connect after a disconnection so calling the socket.connect() method simmultaneously will cause conflict.
+}); //When you create a socket object using the io() constructor, it automatically attempts to establish/initiate a connection to the server using the specified transport options. If the connection is successful, the 'connect' event is emitted, and you can listen for it using the socket.on() method.If the socket object is disconnected from the server, any subsequent calls to socket.emit() will not automatically start a new connection. Instead, the emit() method will try to send the data over the existing disconnected socket, the data will be stored in the socket's buffer and remain in queue until the socket connects and it will be transmitted. Socket.io will attempt to periodically re-connect after a disconnection so calling the socket.connect() method simmultaneously will cause conflict.
 
-//When you create a new socket instance using the io() constructor, the instance establishes a connection to the server and is assigned a unique socket ID. If the connection is lost, and you reconnect to the same server using the same socket instance, a new connection with a different socket ID will be established.
-//So even though the socket instance remains the same, the underlying connection is a new connection with a new socket ID. Any listeners registered on the socket instance before the disconnection will still be active on the new connection, and any new listeners registered on the socket instance after the reconnection will only be active on the new connection.
+//When you create a new socket instance using the io() constructor, the instance establishes a connection to a connection instance in the server and is assigned a unique socket ID. If the connection is lost, and you reconnect to the same server using the same client socket, a new connection instance with a different socket ID will be established.
+//Any listeners registered on the socket before the disconnection will still be active on the new connection instance since the socket is the same despite the connection being new.
 //SO ensure listeners are declared only once and removed (socket.off) before declaring them again. Ideally placed in a useEffect that only runs once when the component mounts
 
 export default function Main() {
@@ -23,7 +23,6 @@ export default function Main() {
   const [inputCode, setInputCode] = useState("");
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
-  //const [plugged, setPlugged] = useState(true);
   const [faceRefLoaded, setFaceRefLoaded] = useState(false);
   //notification permision not needed for just playing sound on user submitting messages
   //const [notification, setNotification] = useState(Notification.permission);
@@ -35,7 +34,7 @@ export default function Main() {
 
   const faceRef = useRef(null);
 
-  //when the browser is refreshed by the user, the react component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener is, and stored the value from sessionStorage, the current value of sessionStorage would be stored. When the user enters new room details via the submithandler, and these replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect to use it inside, then we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listeners which is undesireable. The solution is to wrap the variable in a useRef outside the useEffect where it needs to be used without needing to make it a dependency. When the browser is refreshed, the component re-mounted and the component function re-renders the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and as a dependency, we use the roomTitle variable which causes a re-render only once after the user submits room details and the title of the app gets epdated.
+  //when the browser is refreshed by the user, the react component is re-mounted but the sessionStorage prev values remain. If we declared a variable inside the useEffect where the messages socket listener is, and stored the value from sessionStorage, the actual current value of sessionStorage would be stored. When the user enters new room details via the submithandler, and these replaced the current values stored in sessionStorage, the variable would not be updated since the useEffect will not run again. If we declared the variable outside the useEffect to use it inside, then we would need to add it as a dep to the array causing the uesEffect to re-render more then once and re-declaring socket event listeners which is undesireable. The solution is to wrap the variable in a useRef outside the useEffect where it needs to be used without needing to make it a dependency. When the browser is refreshed, the component re-mounted and the component function re-renders the ref variable will be assinged the new value of the room details after user input and the value inside the useEffect will be up to date. And to make this feature more efficient, we place the logic of extracting and parsing the data from the sessionStorahge inside another useEffect so it does not execute with every render unnecesarily, and as a dependency, we use the roomTitle variable which causes a re-render only once after the user submits room details and the title of the app gets epdated.
   //we store the room details in sessionStorage instead of useState to implement a feature where the app will check if there are room setails in session storage and in case of user refreshing the page the chat will remain in view instead of starting all over from landing page
 
   useEffect(() => {
@@ -60,6 +59,7 @@ export default function Main() {
 
     //IMPORTANT: BE CAREFUL WITH NESTED SOCKET LISTENERS SINCE THE NESTED LISTENER WILL DUPLICATE EVERY TIME THE PARENT LISTENER TRIGGERS
     socket.on("connect", () => {
+      //when the socket disconnects, it will automatically attempt to re-connect periodically but when a re-connection occurs the socket wont automatically join any rooms
       if (localUser.current) {
         socket.emit("room", {
           //coalescing operator (??) assigns empty string if keys null or undefined.
@@ -107,12 +107,17 @@ export default function Main() {
         return [socketMsg, ...prevMessages];
       });
     });
-    socket.on("connect_error", () => {
-      //this listener triggers when the connection cannot be established
-      console.log("CONNECTION ERROR");
-      //IF USING socket.removeAllListeners(); it also removes the error listeners so they need to be added again other option is to remove all listeners individually
+    socket.on("connect_error", (error) => {
+      console.log("FAILED TO CONNECT TO THE SERVER:", error);
+    });
+    socket.on("reconnect_error", (error) => {
+      console.log("FAILED TO CONNECT TO THE SERVER:", error);
+    });
+    socket.on("reconnect_failed", () => {
+      console.log("All reconnection attempts have failed.");
     });
     socket.on("disconnect", () => {
+      //IF USING socket.removeAllListeners(); it also removes the error listeners so they need to be added again other option is to remove all listeners individually
       setMessages((currMsgs) => {
         if (
           (!currMsgs.length || currMsgs[0]?.text !== "🏃💨DISCONNECTED🏃💨") &&
@@ -133,8 +138,7 @@ export default function Main() {
         }
       });
       console.log("DISCONNECTED");
-      //setPlugged(false);
-      //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' + 'connect_error' approach seems to work better
+      //NOTE: socket.connected to monitor the state of the socket connection was not reliable since it was giving 'true' when the connection was in fact lost after the browser being minimised for long time or the compurter in sleep mode, or for other reasons.. so 'disconnect' event approach seems to work better
     });
     ////////////////////////NOTE/////////////////
     //When the socket loses connection event listenters don't get removed by default.
@@ -152,20 +156,7 @@ export default function Main() {
 
   const handleMsgSubmit = (event) => {
     event.preventDefault();
-    //if socket disconnects plugged turns 'false' room details stored in session storage are sent to the server to re-join the room
-    //also use the value of finalSize for cases where state resets but the component does not re-render; thogh not sure if this error can ever occur???
-    // if (!plugged || finalSize === 0) {
-    //   //socket.connect();//this is not needed since socket.io will periodically attempt to re-connect. Room re-joining does not happen automatically socket.connect() needs to be used when the socket is manually disconnected using socket.disconnect() since in this case socket.io won't attempt to re-connect after
-    //   console.log("RE-CONNECTING ");
-    //   //re-joining the room logic will stay on the buffer untill connection is re-established since when the socket disconnected, it was removed from any room it belonged to.
-    //   socket.emit("room", {
-    //     //coalescing operator (??) assigns empty string if keys null or undefined.
-    //     user: localUser.current.user ?? "",
-    //     name: localUser.current.name.toLowerCase() ?? "",
-    //     code: localUser.current.code ?? "",
-    //   });
-    //   setPlugged(true);
-    // }
+    //socket.connect();//this is not needed since socket.io will periodically attempt to re-connect. Room re-joining does not happen automatically socket.connect() needs to be used when the socket is manually disconnected using socket.disconnect() since in this case socket.io won't attempt to re-connect
     const trimmed = inputValue.trim();
     if (isRude(bad, trimmed)) {
       alert("Unaccepted word found! - Contiene palabra invalida!");
@@ -335,6 +326,8 @@ export default function Main() {
           //and the height calculated at the end of aminmations
           height: finalSize,
           paddingLeft: "3vw",
+          visibility:
+            roomFormAnimate === "room-form-disappear" ? "visible" : "hidden",
         }}
       >
         {messages.map((msg, ind) => {
@@ -398,14 +391,6 @@ export default function Main() {
       >
         <input
           ref={inFocusRef}
-          style={
-            {
-              // width: "0px",
-              // border: "solid 1px transparent",
-              // fontSize: "1.3em",
-            }
-          }
-          //className={roomFormAnimate === "room-form-start" ? "" : "expand"}
           type="text"
           placeholder="Type your message here"
           value={inputValue}
