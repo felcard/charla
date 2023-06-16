@@ -267,6 +267,45 @@ button {
     transform-origin: center;
   }
 }
+#main-game-on {
+  visibility: hidden;
+}
+.onHover {
+  z-index: 100;
+  cursor: pointer;
+  position: fixed;
+  background: #00e7dc;
+  font-family: Space Mono;
+  transform: rotate(45deg);
+  top: 0px;
+  right: -30px;
+  animation: moving 0.5s ease-in infinite;
+}
+
+@keyframes moving {
+  0% {
+    transform: rotate(45deg);
+  }
+  15% {
+    transform: rotate(35deg);
+  }
+  25% {
+    transform: rotate(45deg);
+  }
+  75% {
+    transform: rotate(35deg);
+  }
+  100% {
+    transform: rotate(45deg);
+  }
+}
+.onHover:hover {
+  cursor: pointer;
+  top: 0px;
+  right: 0px;
+  animation: none;
+  transform: rotate(0deg);
+}
 
 @media screen and (max-aspect-ratio: 1/1) {
   /* when screen height > width */
@@ -289,5 +328,9 @@ button {
   #face {
     width: 100%;
     font-size: 8.3em;
+  }
+  .onHover {
+    right: -2em;
+    width: 6em;
   }
 }

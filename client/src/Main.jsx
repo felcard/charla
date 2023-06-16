@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { isRude, abcRandom, makeFace, fontColor } from "./tools/fx";
 import { bad } from "./tools/rude";
 import soundFile from "./ring.mp3";
+import TTT from "./components/TTT";
 const audio = new Audio(soundFile);
 audio.load(); //for tests not sure if needed
 //socket-fel.koyeb.app/
@@ -235,6 +236,8 @@ export default function Main() {
   const onExpandAnimationEnd = () => {
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
+    document.getElementById("main-game-on").style.visibility = "visible";
+    //document.getElementById("ttt-game-on").style.visibility = "visible";
     setFinalSize(
       window.visualViewport.height -
         h1Ref.current?.clientHeight -
@@ -247,160 +250,166 @@ export default function Main() {
     setFaceRefLoaded(true);
     //when the javascript (including useEffect blocks) are first loaded all the useRef's .current will be undefined since the comnponent hasn't rendered any html yet so this useEffect is a flag that will turn true after the javascript have loaded and the component rendered for the first time allowing useRef variables to get a current value and avoid undefined errors especially in cases where the .? operator cant be used since although avoids throwing an error it returns undefined which in somecases casues error anyway. So in the useEffect blocks where useRef elements are used we add as dependency the flag so there is a second rendered where useRef elements would be usable/defined. NOT SURE Whether this approach is the best?????
   }, []);
+  const handleGameOn = () => {
+    document.getElementById("cont").style.display = "none";
+    document.getElementById("main-game-on").style.visibility = "hidden";
+    document.getElementById("ttt").style.display = "flex";
+    document.getElementById("ttt-game-on").style.visibility = "visible";
+  };
   return (
-    <div id="cont">
-      <span
-        style={{
-          visibility: "hidden",
-          fontFamily: "user",
-          position: "absolute",
-        }}
-      >
-        font-invisible-preLoader
-      </span>
-      <div id="mask">
+    <div>
+      <TTT />
+      <div id="cont">
+        <div id="main-game-on" onClick={handleGameOn} className="onHover">
+          PLAY
+        </div>
         <span
-          id="face"
-          ref={faceRef}
+          style={{
+            visibility: "hidden",
+            fontFamily: "user",
+            position: "absolute",
+          }}
+        >
+          font-invisible-preLoader
+        </span>
+        <div id="mask">
+          <span
+            id="face"
+            ref={faceRef}
+            style={{
+              display:
+                roomFormAnimate !== "room-form-disappear" ? "block" : "none",
+            }}
+          ></span>
+        </div>
+        <h1 className="unselect" ref={h1Ref}>
+          {roomTitle}
+        </h1>
+        <div id="nav">
+          <div
+            id="room-form-cont"
+            className={roomFormAnimate}
+            onAnimationEnd={() => setRoomFormAnimate("room-form-disappear")}
+            onSubmit={handleRoomSubmit}
+          >
+            <form>
+              <input
+                type="text"
+                placeholder="enter your name"
+                value={inputName}
+                onChange={(e) => setInputName(e.target.value)}
+                autoFocus={true}
+              />
+              <br />
+              <input
+                type="text"
+                placeholder="enter a room name"
+                value={inputRoom}
+                onChange={(e) => setInputRoom(e.target.value)}
+              />
+              <br />
+              <input
+                type="text"
+                placeholder="and a room code"
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value)}
+              />
+              <br />
+              <button type="submit">JOIN</button>
+              <br />
+            </form>
+          </div>
+        </div>
+        <div
+          id="chat-messages"
+          style={{
+            position: "fixed",
+            overflowY: "scroll",
+            scrollBehavior: "smooth",
+            display: "flex",
+            flexDirection: "column-reverse",
+            alignItems: "flex-start",
+            //and the height calculated at the end of aminmations
+            height: finalSize,
+            bottom: chatRef.current?.clientHeight + 5 || 0,
+            paddingLeft: "3vw",
+            visibility:
+              roomFormAnimate === "room-form-disappear" ? "visible" : "hidden",
+          }}
+        >
+          {messages.map((msg, ind) => {
+            return (
+              <div
+                style={{
+                  fontFamily: msg.font,
+                  lineHeight: "1em",
+                  fontSize: msg.font === "Rancho" ? "2.5em" : "2em",
+                  textAlign: "left",
+                  textShadow: `${
+                    msg.msgColor === "magenta"
+                      ? "0px 0px 5px magenta,0px 0px 10px magenta"
+                      : ""
+                  }`,
+                }}
+                key={ind}
+              >
+                <span className="user-face">{makeFace(msg.user)}</span>
+                <span style={{ color: fontColor(msg.user).color }}>
+                  {msg.user}:{" "}
+                </span>
+                <br />
+                <span style={{ color: fontColor(msg.user).color }}>
+                  {msg.text}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "space mono",
+                    fontSize: "0.7rem",
+                    color: "silver",
+                  }}
+                >
+                  {msg.time}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <form
+          id="chat-input-form"
+          ref={chatRef}
+          style={{
+            position: "fixed",
+            bottom: "10px",
+            visibility: "hidden",
+            //we take 2px off the width to account for borders since
+            //100vw on its own does not include borders so if we set
+            //the width of an element to 100vw and also add borders then the
+            //elemnt's width will overflow although initially hidden can cause horizontal scroll bar to appear!!
+            width: "calc(100vw - 2px)",
+          }}
+          className={roomFormAnimate === "room-form-start" ? "" : "expand"}
+          onAnimationEnd={onExpandAnimationEnd}
+          onSubmit={handleMsgSubmit}
+        >
+          <input
+            ref={inFocusRef}
+            type="text"
+            placeholder="Type your message here"
+            value={inputValue}
+            autoComplete="off"
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+        </form>
+        <section
+          id="author"
           style={{
             display:
               roomFormAnimate !== "room-form-disappear" ? "block" : "none",
           }}
-        ></span>
-      </div>
-      <h1 className="unselect" ref={h1Ref}>
-        {roomTitle}
-      </h1>
-      <div id="nav">
-        <div
-          id="room-form-cont"
-          className={roomFormAnimate}
-          onAnimationEnd={() => setRoomFormAnimate("room-form-disappear")}
-          onSubmit={handleRoomSubmit}
         >
-          <form>
-            <input
-              type="text"
-              placeholder="enter your name"
-              value={inputName}
-              onChange={(e) => setInputName(e.target.value)}
-              autoFocus={true}
-            />
-            <br />
-            <input
-              type="text"
-              placeholder="enter a room name"
-              value={inputRoom}
-              onChange={(e) => setInputRoom(e.target.value)}
-            />
-            <br />
-            <input
-              type="text"
-              placeholder="and a room code"
-              value={inputCode}
-              onChange={(e) => setInputCode(e.target.value)}
-            />
-            <br />
-            <button type="submit">JOIN</button>
-            <br />
-          </form>
-        </div>
+          by fel NC
+        </section>
       </div>
-      <div
-        id="chat-messages"
-        style={{
-          //marginTop equals the height of the title plus 1vh (window.innerHeight * 0.01) which is the title's top margin
-          marginTop: h1Ref.current
-            ? h1Ref.current.clientHeight + window.visualViewport.height * 0.08
-            : 0,
-          overflowY: "auto",
-          scrollBehavior: "smooth",
-          display: "flex",
-          flexDirection: "column-reverse",
-          alignItems: "flex-start",
-          //and the height calculated at the end of aminmations
-          height: finalSize,
-          paddingLeft: "3vw",
-          visibility:
-            roomFormAnimate === "room-form-disappear" ? "visible" : "hidden",
-        }}
-      >
-        {messages.map((msg, ind) => {
-          return (
-            <div
-              style={{
-                fontFamily: msg.font,
-                lineHeight: "1em",
-                fontSize: msg.font === "Rancho" ? "2.5em" : "2em",
-                textAlign: "left",
-                textShadow: `${
-                  msg.msgColor === "magenta"
-                    ? "0px 0px 5px magenta,0px 0px 10px magenta"
-                    : ""
-                }`,
-              }}
-              key={ind}
-            >
-              <span className="user-face">{makeFace(msg.user)}</span>
-              <span style={{ color: fontColor(msg.user).color }}>
-                {msg.user}:{" "}
-              </span>
-              <br />
-              <span style={{ color: fontColor(msg.user).color }}>
-                {msg.text}
-              </span>
-              <span
-                style={{
-                  fontFamily: "space mono",
-                  fontSize: "0.7rem",
-                  color: "silver",
-                }}
-              >
-                {msg.time}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      <form
-        id="chat-input-form"
-        ref={chatRef}
-        style={{
-          position: "fixed",
-          top:
-            finalSize !== 0
-              ? h1Ref.current.clientHeight +
-                finalSize +
-                window.visualViewport.height * 0.09
-              : window.visualViewport.height - 40,
-          visibility: "hidden",
-          //we take 2px off the width to account for borders since
-          //100vw on its own does not include borders so if we set
-          //the width of an element to 100vw and also add borders then the
-          //elemnt's width will overflow although initially hidden can cause horizontal scroll bar to appear!!
-          width: "calc(100vw - 2px)",
-        }}
-        className={roomFormAnimate === "room-form-start" ? "" : "expand"}
-        onAnimationEnd={onExpandAnimationEnd}
-        onSubmit={handleMsgSubmit}
-      >
-        <input
-          ref={inFocusRef}
-          type="text"
-          placeholder="Type your message here"
-          value={inputValue}
-          autoComplete="off"
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-      </form>
-      <section
-        id="author"
-        style={{
-          display: roomFormAnimate !== "room-form-disappear" ? "block" : "none",
-        }}
-      >
-        by fel NC
-      </section>
     </div>
   );
 }
