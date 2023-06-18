@@ -7,7 +7,7 @@ import TTT from "./components/TTT";
 const audio = new Audio(soundFile);
 audio.load(); //for tests not sure if needed
 //socket-fel.koyeb.app/
-const socket = io("socket-fel.koyeb.app/", {
+const socket = io("http://localhost:8000/", {
   transports: ["websocket", "xhr-polling"],
 }); //When you create a socket object using the io() constructor, it automatically attempts to establish/initiate a connection to the server using the specified transport options. If the connection is successful, the 'connect' event is emitted, and you can listen for it using the socket.on() method.If the socket object is disconnected from the server, any subsequent calls to socket.emit() will not automatically start a new connection. Instead, the emit() method will try to send the data over the existing disconnected socket, the data will be stored in the socket's buffer and remain in queue until the socket connects and it will be transmitted. Socket.io will attempt to periodically re-connect after a disconnection so calling the socket.connect() method simmultaneously will cause conflict.
 
@@ -25,6 +25,7 @@ export default function Main() {
   const [roomFormAnimate, setRoomFormAnimate] = useState("room-form-start");
   const [finalSize, setFinalSize] = useState(0);
   const [faceRefLoaded, setFaceRefLoaded] = useState(false);
+  const [numberOfPlayers, setNumberOfPlayers] = useState(0);
   //notification permision not needed for just playing sound on user submitting messages
   //const [notification, setNotification] = useState(Notification.permission);
   const h1Ref = useRef(null);
@@ -69,6 +70,10 @@ export default function Main() {
           code: localUser.current.code ?? "",
         });
       }
+    });
+
+    socket.on("playersInRoom", (numOfPlayers) => {
+      setNumberOfPlayers(numOfPlayers);
     });
 
     socket.on("room", (msg) => {
@@ -234,10 +239,12 @@ export default function Main() {
   }, [faceRefLoaded]);
 
   const onExpandAnimationEnd = () => {
+    if (numberOfPlayers < 3) {
+      document.getElementById("main-game-on").style.visibility = "visible";
+    }
+    //document.getElementById("ttt-game-on").style.visibility = "visible";
     //add a bit of difference to allow separation from the
     //messages area and the input chat box with 0.02 of screen height
-    document.getElementById("main-game-on").style.visibility = "visible";
-    //document.getElementById("ttt-game-on").style.visibility = "visible";
     setFinalSize(
       window.visualViewport.height -
         h1Ref.current?.clientHeight -
@@ -251,18 +258,22 @@ export default function Main() {
     //when the javascript (including useEffect blocks) are first loaded all the useRef's .current will be undefined since the comnponent hasn't rendered any html yet so this useEffect is a flag that will turn true after the javascript have loaded and the component rendered for the first time allowing useRef variables to get a current value and avoid undefined errors especially in cases where the .? operator cant be used since although avoids throwing an error it returns undefined which in somecases casues error anyway. So in the useEffect blocks where useRef elements are used we add as dependency the flag so there is a second rendered where useRef elements would be usable/defined. NOT SURE Whether this approach is the best?????
   }, []);
   const handleGameOn = () => {
-    document.getElementById("cont").style.display = "none";
-    document.getElementById("main-game-on").style.visibility = "hidden";
-    document.getElementById("ttt").style.display = "flex";
-    document.getElementById("ttt-game-on").style.visibility = "visible";
+    if (numberOfPlayers < 3) {
+      document.getElementById("cont").style.display = "none";
+      document.getElementById("main-game-on").style.visibility = "hidden";
+      document.getElementById("ttt").style.display = "flex";
+      document.getElementById("ttt-game-on").style.visibility = "visible";
+    }
   };
   return (
     <div>
-      <TTT />
+      {numberOfPlayers < 3 && <TTT socket={socket} />}
       <div id="cont">
-        <div id="main-game-on" onClick={handleGameOn} className="onHover">
-          PLAY
-        </div>
+        {numberOfPlayers < 3 && (
+          <div id="main-game-on" onClick={handleGameOn} className="onHover">
+            PLAY
+          </div>
+        )}
         <span
           style={{
             visibility: "hidden",

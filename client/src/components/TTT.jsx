@@ -3,18 +3,21 @@ import { useState, useRef, useEffect } from "react";
 import { arrCrawler } from "./tools/utils";
 const playground = [];
 let playerMoveCount = 0;
+let playerId;
 
-function TTT() {
+function TTT({ socket }) {
   const [move, setMove] = useState("X");
   const [playerScores, setPlayerScores] = useState({
     playerO: "",
     playerX: "",
   });
-  const [cellSize, setCellSize] = useState(0);
+  //const [cellSize, setCellSize] = useState(0);
   const [winLineLength, setWinLineLength] = useState(3);
   const [col, setCols] = useState(3);
   const boardRef = useRef(null);
   const cols = useRef([]);
+
+  const cellSize = (boardRef.current?.offsetWidth - 5 * (col - 1)) / col;
 
   useEffect(() => {
     //set max board size options dependeing on device
@@ -28,14 +31,15 @@ function TTT() {
   }, []);
 
   const handleReset = () => {
-    playerMoveCount = 0;
-    setPlayerScores({ playerO: "", playerX: "" });
-    for (let i = 0; i < col; i++) {
-      playground[i] = [];
-      for (let j = 0; j < col; j++) {
-        playground[i][j] = "";
-      }
-    }
+    socket.emit("colChange", col);
+    // playerMoveCount = 0;
+    // setPlayerScores({ playerO: "", playerX: "" });
+    // for (let i = 0; i < col; i++) {
+    //   playground[i] = [];
+    //   for (let j = 0; j < col; j++) {
+    //     playground[i][j] = "";
+    //   }
+    // }
   };
 
   const handleColsChange = (e) => {
@@ -43,9 +47,10 @@ function TTT() {
       alert("Score Line cant be bigger than Board Size");
       return;
     }
-    setPlayerScores({ playerO: "", playerX: "" });
-    setCols(e.target.value);
-    playerMoveCount = 0;
+    socket.emit("colChange", e.target.value);
+    //setPlayerScores({ playerO: "", playerX: "" });
+    //setCols(e.target.value);
+    //playerMoveCount = 0;
   };
   const handleWinLine = (e) => {
     if (parseInt(e.target.value) > parseInt(col)) {
@@ -53,12 +58,14 @@ function TTT() {
       setWinLineLength(3);
       return;
     }
-
-    setWinLineLength(parseInt(e.target.value));
+    socket.emit("winLineChange", e.target.value);
+    //setWinLineLength(parseInt(e.target.value));
   };
 
   useEffect(() => {
+    setPlayerScores({ playerO: "", playerX: "" });
     playground.length = 0;
+    playerMoveCount = 0;
     //playground = Array.from({ length: col }, () => Array(col).fill(''));
     for (let i = 0; i < col; i++) {
       playground[i] = [];
@@ -68,29 +75,66 @@ function TTT() {
     }
   }, [col]);
 
-  const playerMove = (rowInd, colInd) => {
-    if (move === "O" && playground[rowInd][colInd] === "") {
+  useEffect(() => {
+    socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
+      playerId = id;
       playerMoveCount++;
-      playground[rowInd][colInd] = "X";
-      setMove("X");
-    } else {
-      if (playground[rowInd][colInd] === "") {
-        playerMoveCount++;
-        playground[rowInd][colInd] = "O";
-        setMove("O");
+      playground[rowInd][colInd] = item;
+      if (playerMoveCount === col * col) {
+        setPlayerScores(arrCrawler(parseInt(winLineLength), playground));
+      }
+      setMove(item);
+    });
+
+    socket.on("colChange", (col) => {
+      setCols(parseInt(col));
+      setPlayerScores({ playerO: "", playerX: "" });
+      playerMoveCount = 0;
+      playground.length = 0;
+      //playground = Array.from({ length: col }, () => Array(col).fill(''));
+      for (let i = 0; i < col; i++) {
+        playground[i] = [];
+        for (let j = 0; j < col; j++) {
+          playground[i][j] = "";
+        }
+      }
+    });
+
+    socket.on("winLineChange", (winLine) => {
+      setWinLineLength(parseInt(winLine));
+    });
+
+    return () => {
+      socket.off("playerMove");
+      socket.off("colChange");
+      socket.off("winLineChange");
+    };
+  }, [socket, col, winLineLength]);
+
+  const playerMove = (rowInd, colInd) => {
+    if (playerId !== socket.id) {
+      if (move === "O" && playground[rowInd][colInd] === "") {
+        socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
+        //playground[rowInd][colInd] = "X";
+        //setMove("X");
+      } else {
+        if (playground[rowInd][colInd] === "") {
+          socket.emit("playerMove", {
+            rowInd,
+            colInd,
+            item: "O",
+            id: socket.id,
+          });
+          //playground[rowInd][colInd] = "O";
+          //setMove("O");
+        }
       }
     }
-    if (playerMoveCount === col * col) {
-      setPlayerScores(arrCrawler(parseInt(winLineLength), playground));
-    }
   };
-  useEffect(() => {
-    //5px is the grid gap. num of columns -1 = num of gaps
-    setCellSize((boardRef.current?.offsetWidth - 5 * (col - 1)) / col);
-    if (boardRef.current) {
-      document.getElementById("ttt").style.display = "none";
-    }
-  }, [col]);
+  // useEffect(() => {
+  //   //5px is the grid gap. num of columns -1 = num of gaps
+  //   setCellSize((boardRef.current?.offsetWidth - 5 * (col - 1)) / col);
+  // }, [col]);
 
   let winColor;
 

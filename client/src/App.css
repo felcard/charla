@@ -24,7 +24,7 @@
   display: none;
 }
 body {
-  background: rgb(26, 21, 2);
+  background: #1a1502;
 }
 input {
   padding-left: 0.2em;
@@ -132,6 +132,8 @@ button {
   flex-direction: "column-reverse";
   align-items: "flex-start";
   padding-left: "3vw";
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
 }
 /* ANIMATION CSS RULES TAKE PRECENDENCE OVER INLINE STYLE,CLASSES */
 .expand {
@@ -271,13 +273,15 @@ button {
   visibility: hidden;
 }
 .onHover {
+  color: #d30bb8;
   z-index: 100;
   cursor: pointer;
   position: fixed;
-  background: #00e7dc;
+  background: linear-gradient(90deg, #1a1502, #00e7dc, #1a1502);
   font-family: Space Mono;
   transform: rotate(45deg);
   top: 0px;
+  width: 6em;
   right: -30px;
   animation: moving 0.5s ease-in infinite;
 }
