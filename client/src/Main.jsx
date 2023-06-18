@@ -7,7 +7,7 @@ import TTT from "./components/TTT";
 const audio = new Audio(soundFile);
 audio.load(); //for tests not sure if needed
 //socket-fel.koyeb.app/
-const socket = io("http://localhost:8000/", {
+const socket = io("socket-fel.koyeb.app/", {
   transports: ["websocket", "xhr-polling"],
 }); //When you create a socket object using the io() constructor, it automatically attempts to establish/initiate a connection to the server using the specified transport options. If the connection is successful, the 'connect' event is emitted, and you can listen for it using the socket.on() method.If the socket object is disconnected from the server, any subsequent calls to socket.emit() will not automatically start a new connection. Instead, the emit() method will try to send the data over the existing disconnected socket, the data will be stored in the socket's buffer and remain in queue until the socket connects and it will be transmitted. Socket.io will attempt to periodically re-connect after a disconnection so calling the socket.connect() method simmultaneously will cause conflict.
 
