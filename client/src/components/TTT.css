@@ -14,10 +14,7 @@
   font-display: block;
 }
 
-/* * {
-  margin: 0px;
-  padding: 0px;
-} */
+/* NAMED CLASSES AND ID'S WITH PRECEDING TTT IS TO AVOID CLASHING WITH MAIN COMPONENT CLASS AND ID NAMES */
 select {
   border: solid 1px rgb(132, 43, 177);
   outline: none;
@@ -26,23 +23,7 @@ select {
   font-size: 0.6em;
   font-family: opciones;
 }
-/* body {
-  color: rgb(207, 151, 235);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: 100%;
-  background: rgb(46, 15, 61);
-} */
-.ttt-title {
-  font-size: 3em;
-  font-family: ttt-titulo;
-}
-#options {
-  font-size: 2em;
-  font-family: opciones;
-}
+
 #ttt {
   display: none;
   color: rgb(207, 151, 235);
@@ -54,8 +35,30 @@ select {
   background: rgb(46, 15, 61);
   text-align: center;
 }
+.ttt-title {
+  font-size: 3em;
+  font-family: ttt-titulo;
+  letter-spacing: -1px;
+  top: 0.5vh;
+  width: 98vw;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: lighter;
+}
+#options {
+  top: 2em;
+  position: fixed;
+  font-size: 2em;
+  font-family: opciones;
+}
 #board-cont {
-  margin: 0.8em 0;
+  position: fixed;
+  top: 7em;
   width: var(--board-size);
   height: var(--board-size);
   background: rgb(185, 61, 247);
@@ -82,9 +85,11 @@ select {
   padding: 0px;
 }
 :root {
-  --board-size: 70vh;
+  --board-size: 60vh;
 }
 #footer {
+  position: fixed;
+  bottom: 0.5em;
   line-height: 1.2em;
   display: flex;
   align-items: center;
@@ -119,6 +124,12 @@ select {
   right: -30px;
   animation: moving 0.5s ease-in infinite;
 }
+.ttt-unselect {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
 
 @keyframes moving {
   0% {
@@ -144,22 +155,25 @@ select {
   animation: none;
   transform: rotate(0deg);
 }
-@media (orientation: portrait) {
+@media (min-width: 630px) and (orientation: portrait) {
+  :root {
+    --board-size: 60vw;
+  }
+  #board-cont {
+    top: 8em;
+  }
+  #footer {
+    flex-direction: column;
+  }
+}
+@media (max-width: 630px) and (orientation: portrait) {
   :root {
     --board-size: 90vw;
   }
   #board-cont {
-    margin: 0px;
-  }
-  .ttt-title {
-    font-size: 2em;
+    top: 10em;
   }
   #footer {
-    margin-top: 0.5em;
     flex-direction: column;
-  }
-  .ttt-onHover {
-    right: -2em;
-    width: 6em;
   }
 }

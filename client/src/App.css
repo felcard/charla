@@ -58,7 +58,7 @@ input {
   left: 50%;
   transform: translateX(-50%);
 }
-h1 {
+.main-title {
   top: 2vh;
   width: 98vw;
   position: fixed;
@@ -313,7 +313,7 @@ button {
 
 @media screen and (max-aspect-ratio: 1/1) {
   /* when screen height > width */
-  h1 {
+  .main-title {
     top: 2.5vh;
     font-size: 5vw;
     transform: scaleY(1.5) translateX(-50%);

@@ -293,7 +293,7 @@ export default function Main() {
             }}
           ></span>
         </div>
-        <h1 className="unselect" ref={h1Ref}>
+        <h1 className="unselect main-title" ref={h1Ref}>
           {roomTitle}
         </h1>
         <div id="nav">

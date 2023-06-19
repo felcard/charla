@@ -1,9 +1,6 @@
 import "./TTT.css";
 import { useState, useRef, useEffect } from "react";
 import { arrCrawler } from "./tools/utils";
-const playground = [];
-let playerMoveCount = 0;
-let playerId;
 
 function TTT({ socket }) {
   const [move, setMove] = useState("X");
@@ -16,6 +13,9 @@ function TTT({ socket }) {
   const [col, setCols] = useState(3);
   const boardRef = useRef(null);
   const cols = useRef([]);
+  const playerMoveCount = useRef(0);
+  const playerId = useRef("");
+  const playground = useRef([]);
 
   const cellSize = (boardRef.current?.offsetWidth - 5 * (col - 1)) / col;
 
@@ -32,14 +32,6 @@ function TTT({ socket }) {
 
   const handleReset = () => {
     socket.emit("colChange", col);
-    // playerMoveCount = 0;
-    // setPlayerScores({ playerO: "", playerX: "" });
-    // for (let i = 0; i < col; i++) {
-    //   playground[i] = [];
-    //   for (let j = 0; j < col; j++) {
-    //     playground[i][j] = "";
-    //   }
-    // }
   };
 
   const handleColsChange = (e) => {
@@ -48,9 +40,6 @@ function TTT({ socket }) {
       return;
     }
     socket.emit("colChange", e.target.value);
-    //setPlayerScores({ playerO: "", playerX: "" });
-    //setCols(e.target.value);
-    //playerMoveCount = 0;
   };
   const handleWinLine = (e) => {
     if (parseInt(e.target.value) > parseInt(col)) {
@@ -59,43 +48,46 @@ function TTT({ socket }) {
       return;
     }
     socket.emit("winLineChange", e.target.value);
-    //setWinLineLength(parseInt(e.target.value));
   };
 
   useEffect(() => {
     setPlayerScores({ playerO: "", playerX: "" });
-    playground.length = 0;
-    playerMoveCount = 0;
-    //playground = Array.from({ length: col }, () => Array(col).fill(''));
+    playground.current.length = 0;
+    playerMoveCount.current = 0;
+    //playground.current = Array.from({ length: col }, () => Array(col).fill(''));
     for (let i = 0; i < col; i++) {
-      playground[i] = [];
+      playground.current[i] = [];
       for (let j = 0; j < col; j++) {
-        playground[i][j] = "";
+        playground.current[i][j] = "";
       }
     }
   }, [col]);
 
   useEffect(() => {
     socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
-      playerId = id;
-      playerMoveCount++;
-      playground[rowInd][colInd] = item;
-      if (playerMoveCount === col * col) {
-        setPlayerScores(arrCrawler(parseInt(winLineLength), playground));
+      playerId.current = id;
+      playerMoveCount.current++;
+      playground.current[rowInd][colInd] = item;
+      if (playerMoveCount.current === col * col) {
+        setPlayerScores(
+          arrCrawler(parseInt(winLineLength), playground.current)
+        );
       }
       setMove(item);
     });
 
     socket.on("colChange", (col) => {
       setCols(parseInt(col));
+      playerId.current = "";
+      //this listener also resets the board
       setPlayerScores({ playerO: "", playerX: "" });
-      playerMoveCount = 0;
-      playground.length = 0;
-      //playground = Array.from({ length: col }, () => Array(col).fill(''));
+      playerMoveCount.current = 0;
+      playground.current.length = 0;
+      //playground.current = Array.from({ length: col }, () => Array(col).fill(''));
       for (let i = 0; i < col; i++) {
-        playground[i] = [];
+        playground.current[i] = [];
         for (let j = 0; j < col; j++) {
-          playground[i][j] = "";
+          playground.current[i][j] = "";
         }
       }
     });
@@ -112,20 +104,20 @@ function TTT({ socket }) {
   }, [socket, col, winLineLength]);
 
   const playerMove = (rowInd, colInd) => {
-    if (playerId !== socket.id) {
-      if (move === "O" && playground[rowInd][colInd] === "") {
+    if (playerId.current !== socket.id) {
+      if (move === "O" && playground.current[rowInd][colInd] === "") {
         socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
-        //playground[rowInd][colInd] = "X";
+        //playground.current[rowInd][colInd] = "X";
         //setMove("X");
       } else {
-        if (playground[rowInd][colInd] === "") {
+        if (playground.current[rowInd][colInd] === "") {
           socket.emit("playerMove", {
             rowInd,
             colInd,
             item: "O",
             id: socket.id,
           });
-          //playground[rowInd][colInd] = "O";
+          //playground.current[rowInd][colInd] = "O";
           //setMove("O");
         }
       }
@@ -223,7 +215,7 @@ function TTT({ socket }) {
           }}
           ref={boardRef}
         >
-          {playground.map((row, rowInd) => {
+          {playground.current.map((row, rowInd) => {
             return row.map((col, colInd) => {
               if (
                 playerScores.winArr &&
@@ -235,12 +227,12 @@ function TTT({ socket }) {
               }
               return (
                 <div
-                  className="board-cell"
+                  className="board-cell ttt-unselect"
                   key={rowInd + colInd}
                   onClick={() => playerMove(rowInd, colInd)}
                   style={{
                     color: `${
-                      playground[rowInd][colInd] === "X"
+                      playground.current[rowInd][colInd] === "X"
                         ? `hsl(310, 100%, ${winColor})`
                         : `hsl(199, 100%, ${winColor})`
                     }`,
