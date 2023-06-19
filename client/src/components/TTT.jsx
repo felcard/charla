@@ -12,12 +12,25 @@ function TTT({ socket }) {
   const [winLineLength, setWinLineLength] = useState(3);
   const [col, setCols] = useState(3);
   const boardRef = useRef(null);
-  const cols = useRef([]);
+  const colsSelect = useRef([]);
   const playerMoveCount = useRef(0);
   const playerId = useRef("");
   const playground = useRef([]);
-
+  //5px is the grid gap. num of columns -1 = num of gaps
   const cellSize = (boardRef.current?.offsetWidth - 5 * (col - 1)) / col;
+  //the component initially loads with css display:"none" so dom elements
+  //will have undefined dimentions
+
+  const boardInit = useRef((col) => {
+    //board initialising func
+    playerId.current = "";
+    setPlayerScores({ playerO: "", playerX: "" });
+    playerMoveCount.current = 0;
+    playground.current = Array.from({ length: col }, () =>
+      Array.from({ length: col }, () => "")
+    );
+    //playground.current = Array.from({ length: col }, () => Array(col).fill('')); this does not work since it uses the same array in the callback function 'col' number of times
+  });
 
   useEffect(() => {
     //set max board size options dependeing on device
@@ -25,9 +38,11 @@ function TTT({ socket }) {
     window.innerHeight > window.innerWidth || window.innerHeight < 800
       ? (arrLength = 6)
       : (arrLength = 10);
-    cols.current = Array(arrLength)
+    colsSelect.current = Array(arrLength)
       .fill("")
       .map((_, ind) => ind + 3);
+
+    boardInit.current(3); //initialise a 3x3 board
   }, []);
 
   const handleReset = () => {
@@ -51,19 +66,6 @@ function TTT({ socket }) {
   };
 
   useEffect(() => {
-    setPlayerScores({ playerO: "", playerX: "" });
-    playground.current.length = 0;
-    playerMoveCount.current = 0;
-    //playground.current = Array.from({ length: col }, () => Array(col).fill(''));
-    for (let i = 0; i < col; i++) {
-      playground.current[i] = [];
-      for (let j = 0; j < col; j++) {
-        playground.current[i][j] = "";
-      }
-    }
-  }, [col]);
-
-  useEffect(() => {
     socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
       playerId.current = id;
       playerMoveCount.current++;
@@ -78,18 +80,7 @@ function TTT({ socket }) {
 
     socket.on("colChange", (col) => {
       setCols(parseInt(col));
-      playerId.current = "";
-      //this listener also resets the board
-      setPlayerScores({ playerO: "", playerX: "" });
-      playerMoveCount.current = 0;
-      playground.current.length = 0;
-      //playground.current = Array.from({ length: col }, () => Array(col).fill(''));
-      for (let i = 0; i < col; i++) {
-        playground.current[i] = [];
-        for (let j = 0; j < col; j++) {
-          playground.current[i][j] = "";
-        }
-      }
+      boardInit.current(col);
     });
 
     socket.on("winLineChange", (winLine) => {
@@ -103,12 +94,10 @@ function TTT({ socket }) {
     };
   }, [socket, col, winLineLength]);
 
-  const playerMove = (rowInd, colInd) => {
+  const handlePlayerMove = (rowInd, colInd) => {
     if (playerId.current !== socket.id) {
       if (move === "O" && playground.current[rowInd][colInd] === "") {
         socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
-        //playground.current[rowInd][colInd] = "X";
-        //setMove("X");
       } else {
         if (playground.current[rowInd][colInd] === "") {
           socket.emit("playerMove", {
@@ -117,16 +106,10 @@ function TTT({ socket }) {
             item: "O",
             id: socket.id,
           });
-          //playground.current[rowInd][colInd] = "O";
-          //setMove("O");
         }
       }
     }
   };
-  // useEffect(() => {
-  //   //5px is the grid gap. num of columns -1 = num of gaps
-  //   setCellSize((boardRef.current?.offsetWidth - 5 * (col - 1)) / col);
-  // }, [col]);
 
   let winColor;
 
@@ -165,6 +148,7 @@ function TTT({ socket }) {
   const handleGameOn = () => {
     document.getElementById("ttt").style.display = "none";
     document.getElementById("ttt-game-on").style.visibility = "hidden";
+    //below we target the main component
     document.getElementById("cont").style.display = "block";
     document.getElementById("main-game-on").style.visibility = "visible";
   };
@@ -179,7 +163,7 @@ function TTT({ socket }) {
         <span>
           <label htmlFor="size-options">Board Size: </label>
           <select onChange={handleColsChange} value={col} name="size-options">
-            {cols.current.map((column) => {
+            {colsSelect.current.map((column) => {
               return (
                 <option value={column} key={column}>
                   {column}
@@ -195,7 +179,7 @@ function TTT({ socket }) {
             value={winLineLength}
             name="win-line"
           >
-            {cols.current.map((winLine) => {
+            {colsSelect.current.map((winLine) => {
               return (
                 <option value={winLine} key={`${winLine}+'winLine'`}>
                   {winLine}
@@ -229,7 +213,7 @@ function TTT({ socket }) {
                 <div
                   className="board-cell ttt-unselect"
                   key={rowInd + colInd}
-                  onClick={() => playerMove(rowInd, colInd)}
+                  onClick={() => handlePlayerMove(rowInd, colInd)}
                   style={{
                     color: `${
                       playground.current[rowInd][colInd] === "X"
@@ -267,7 +251,7 @@ function TTT({ socket }) {
           ref={wordRef}
           className="skew-effect"
           style={{
-            order: cols.current.length === 6 ? "3" : "",
+            order: colsSelect.current.length === 6 ? "3" : "",
             fontSize: "1.5em",
           }}
           onClick={handleReset}
