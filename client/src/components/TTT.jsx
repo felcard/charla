@@ -21,6 +21,8 @@ function TTT({ socket }) {
   //the component initially loads with css display:"none" so dom elements
   //will have undefined dimentions
 
+  const noDoublePlayRef = useRef(true); //prevent double play by not allowing a player turn to go through before the other player event has arrived and received by the listener
+
   const boardInit = useRef((col) => {
     //board initialising func
     playerId.current = "";
@@ -67,6 +69,7 @@ function TTT({ socket }) {
 
   useEffect(() => {
     socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
+      noDoublePlayRef.current = true;
       playerId.current = id;
       playerMoveCount.current++;
       playground.current[rowInd][colInd] = item;
@@ -95,7 +98,7 @@ function TTT({ socket }) {
   }, [socket, col, winLineLength]);
 
   const handlePlayerMove = (rowInd, colInd) => {
-    if (playerId.current !== socket.id) {
+    if (playerId.current !== socket.id && noDoublePlayRef.current) {
       if (move === "O" && playground.current[rowInd][colInd] === "") {
         socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
       } else {
@@ -108,6 +111,7 @@ function TTT({ socket }) {
           });
         }
       }
+      noDoublePlayRef.current = false;
     }
   };
 
