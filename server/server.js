@@ -2,19 +2,19 @@ const http = require('http');
 const server = http.createServer();
 const { Server } = require("socket.io");
 const io = new Server(server, {
-    cors: { origin: "https://cleanchat.netlify.app/", credentials: true },
+    cors: { origin: "https://powerchat.netlify.app/", credentials: true },
     //pingInterval: 30000,
     //pingTimeout: 120000,
 });
 //guests object to monitor user connections for cases when the user disconnects and the disconnection event
-//arrives after the user's socket has re-connected and avoid sending disconnection message
-//object is outside io connection since for each connection there is a new instance and if the
+//arrives after the user's socket has re-connected and avoid sending disconnection message.
+//guests object is outside io connection since for each connection there is a new instance and if the
 //object was inside it will only be able to be used inside the unique connection instance
 //every time a client socket connects to the server via port being listened, io creates an individual
 //socket connection for that socket, although a room is 'shared' among instances so when a room
 //is created in one instance, if a different socket on another connection instance connects to the
 //room with same name it will be connecting to the same unique room  
-const guests = {};
+let guests = {};
 io.on('connection', (socket) => {
     console.log(`user: ${socket.id} connected to MAIN`);
     socket.on('room', room => {
@@ -31,7 +31,6 @@ io.on('connection', (socket) => {
             if (room.code === roomData.data.code) {
                 socket.join(room.name);
                 io.to(room.name).emit('message', { msg: ' IS IN THE ROOM 👋', user: room.user });
-
             } else {
                 socket.emit('room', 'ROOM TAKEN');
                 socket.emit('message', { msg: 'INCORRECT ROOM CODE : Reload page and try again', user: room.user });
@@ -94,6 +93,8 @@ io.on('connection', (socket) => {
     // });
     socket.on('disconnect', () => {//this listens for disconnection event from a socket that has not joind a room
         console.log(`user: ${socket.id} DISCONNECTED`);
+        if (io.sockets.sockets.size === 0) guests = {};//io.sockets.sockets return a Map object and method size returns the number of properties
+        console.log('Number of clients connected to Main Socket', io.sockets.sockets.size);
     });
 });
 const { PORT = 8000 } = process.env;
