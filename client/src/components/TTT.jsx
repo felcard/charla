@@ -21,7 +21,7 @@ function TTT({ socket }) {
   //the component initially loads with css display:"none" so dom elements
   //will have undefined dimentions
 
-  const noDoublePlayRef = useRef(true); //prevent double play by not allowing a player turn to go through before the other player event has arrived and received by the listener
+  const noDoublePlayRef = useRef(true); //prevent double play by not allowing a player turn to go through before the other player event has arrived and received by the listener.Specially prevents double click on the board when the condition (id coming from server !== id from the current socket playing)
 
   const boardInit = useRef((col) => {
     //board initialising func
@@ -48,6 +48,7 @@ function TTT({ socket }) {
   }, []);
 
   const handleReset = () => {
+    //emit col to transmit reset to other player without needing to create a separate reset logic
     socket.emit("colChange", col);
   };
 
@@ -101,6 +102,7 @@ function TTT({ socket }) {
     if (playerId.current !== socket.id && noDoublePlayRef.current) {
       if (move === "O" && playground.current[rowInd][colInd] === "") {
         socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
+        noDoublePlayRef.current = false;
       } else {
         if (playground.current[rowInd][colInd] === "") {
           socket.emit("playerMove", {
@@ -109,9 +111,9 @@ function TTT({ socket }) {
             item: "O",
             id: socket.id,
           });
+          noDoublePlayRef.current = false;
         }
       }
-      noDoublePlayRef.current = false;
     }
   };
 
