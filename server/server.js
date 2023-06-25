@@ -6,6 +6,7 @@ const io = new Server(server, {
     //pingInterval: 30000,
     //pingTimeout: 120000,
 });
+const crawler = require('./crawler');
 //guests object to monitor user connections for cases when the user disconnects and the disconnection event
 //arrives after the user's socket has re-connected and avoid sending disconnection message.
 //guests object is outside io connection since for each connection there is a new instance and if the
@@ -42,7 +43,7 @@ io.on('connection', (socket) => {
         //nullish coalescing operator (??) is used to provide default values ({} and 0) in case the nested properties are null or undefined
         guests[room.name] = guests[room.name] ?? {};
         guests[room.name][room.user] = (guests[room.name][room.user] ?? 0) + 1;
-        socket.emit('playersInRoom', Object.keys(guests[room.name]).length);
+        io.to(room.name).emit('playersInRoom', Object.keys(guests[room.name]).length);
         //guests[room.user] = (guests[room.user] || 0) + 1;
         // socket.join(room.name);
         // socket.emit('joined', 'joined room');
@@ -66,9 +67,10 @@ io.on('connection', (socket) => {
                 io.to(room.name).emit('winLineChange', winLine);
             }
         });
+        socket.on('arr2crawl', ({ winLine, arr }) => {
+            io.to(room.name).emit('arr2crawl', crawler(winLine, arr));
+        });
         socket.on('disconnecting', () => {
-            //if user disconnection is one of the first two (who can play)then reset game
-            if (Object.keys(guests[room.name]).indexOf(room.user) < 2) io.to(room.name).emit('colChange', 3);
             //this avoids sending delayed disconnected message after the user has re-joined
             if (guests[room.name][room.user] === 1) {
                 io.to(room.name).emit('message', { msg: 'k@t@n@', user: room.user });
@@ -76,6 +78,9 @@ io.on('connection', (socket) => {
             } else {
                 guests[room.name][room.user] -= 1;
             }
+            io.to(room.name).emit('playersInRoom', Object.keys(guests[room.name]).length);
+            //if user disconnection is one of the first two (who can play)then reset game
+            if (Object.keys(guests[room.name]).indexOf(room.user) < 2) io.to(room.name).emit('colChange', 3);
             console.log(`User: ${socket.id} disconnected from MAIN.`);
             console.log('Room Guests: ', guests);
         });
