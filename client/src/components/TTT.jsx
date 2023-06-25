@@ -1,16 +1,16 @@
 import "./TTT.css";
 import { useState, useRef, useEffect } from "react";
-import { arrCrawler } from "./tools/utils";
+
+//IN CASES OF NETWORK DISCONNECTION and not wanting to do a full board reset and stop the game on disconnection then sassion storage will need to be used to keep records of board and user moves and in cases when one user disconnects and the other user having the play turn and playing, when the user re-connects there should be a record of last play kept by server and so when the user reconnects the client will check the last play on his board matches the last played in the server by the other player.
 
 function TTT({ socket }) {
   const [move, setMove] = useState("X");
-  const [playerScores, setPlayerScores] = useState({
-    playerO: "",
-    playerX: "",
-  });
+  const [playerScores, setPlayerScores] = useState({});
   //const [cellSize, setCellSize] = useState(0);
   const [winLineLength, setWinLineLength] = useState(3);
   const [col, setCols] = useState(3);
+  const [netLoss, setNetLoss] = useState(false);
+  const [playersInRoom, setPlayersInRoom] = useState(0);
   const boardRef = useRef(null);
   const colsSelect = useRef([]);
   const playerMoveCount = useRef(0);
@@ -21,12 +21,20 @@ function TTT({ socket }) {
   //the component initially loads with css display:"none" so dom elements
   //will have undefined dimentions
 
+  const colToAvoidUseEffectReRun = useRef(3);
+  colToAvoidUseEffectReRun.current = col;
+  const winLineLengthToAvoidUseEffectReRun = useRef(3);
+  winLineLengthToAvoidUseEffectReRun.current = winLineLength;
+
   const noDoublePlayRef = useRef(true); //prevent double play by not allowing a player turn to go through before the other player event has arrived and received by the listener.Specially prevents double click on the board when the condition (id coming from server !== id from the current socket playing)
+
+  const flag = useRef(true); //avoids final results to be rendered twice inside arr2crawl listener
 
   const boardInit = useRef((col) => {
     //board initialising func
+    noDoublePlayRef.current = true;
     playerId.current = "";
-    setPlayerScores({ playerO: "", playerX: "" });
+    setPlayerScores({});
     playerMoveCount.current = 0;
     playground.current = Array.from({ length: col }, () =>
       Array.from({ length: col }, () => "")
@@ -68,38 +76,12 @@ function TTT({ socket }) {
     socket.emit("winLineChange", e.target.value);
   };
 
-  useEffect(() => {
-    socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
-      noDoublePlayRef.current = true;
-      playerId.current = id;
-      playerMoveCount.current++;
-      playground.current[rowInd][colInd] = item;
-      if (playerMoveCount.current === col * col) {
-        setPlayerScores(
-          arrCrawler(parseInt(winLineLength), playground.current)
-        );
-      }
-      setMove(item);
-    });
-
-    socket.on("colChange", (col) => {
-      setCols(parseInt(col));
-      boardInit.current(col);
-    });
-
-    socket.on("winLineChange", (winLine) => {
-      setWinLineLength(parseInt(winLine));
-    });
-
-    return () => {
-      socket.off("playerMove");
-      socket.off("colChange");
-      socket.off("winLineChange");
-    };
-  }, [socket, col, winLineLength]);
-
   const handlePlayerMove = (rowInd, colInd) => {
-    if (playerId.current !== socket.id && noDoublePlayRef.current) {
+    if (
+      playerId.current !== socket.id &&
+      noDoublePlayRef.current &&
+      playersInRoom > 1
+    ) {
       if (move === "O" && playground.current[rowInd][colInd] === "") {
         socket.emit("playerMove", { rowInd, colInd, item: "X", id: socket.id });
         noDoublePlayRef.current = false;
@@ -116,6 +98,55 @@ function TTT({ socket }) {
       }
     }
   };
+
+  useEffect(() => {
+    socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
+      noDoublePlayRef.current = true;
+      playerId.current = id;
+      playerMoveCount.current++;
+      playground.current[rowInd][colInd] = item;
+      if (
+        playerMoveCount.current ===
+        colToAvoidUseEffectReRun?.current * colToAvoidUseEffectReRun?.current
+      ) {
+        socket.emit("arr2crawl", {
+          winLine: winLineLengthToAvoidUseEffectReRun?.current,
+          arr: playground.current,
+        });
+      }
+      setMove(item);
+    });
+    socket.on("arr2crawl", (results) => {
+      if (flag.current) {
+        setPlayerScores(results);
+        flag.current = false;
+      }
+    });
+
+    socket.on("colChange", (col) => {
+      setCols(parseInt(col));
+      boardInit.current(col);
+      flag.current = true;
+    });
+
+    socket.on("winLineChange", (winLine) => {
+      setWinLineLength(parseInt(winLine));
+    });
+    socket.on("playersInRoom", (numOfPlayers) => {
+      setPlayersInRoom(numOfPlayers);
+    });
+    socket.on("disconnect", () => {
+      boardInit.current(3);
+      setCols(3);
+      setNetLoss(true);
+    });
+
+    return () => {
+      console.log("CLEAN UP FUNCTION");
+      socket.removeAllListeners();
+      socket.disconnect();
+    };
+  }, [socket]);
 
   let winColor;
 
@@ -243,9 +274,21 @@ function TTT({ socket }) {
         </div>
       </div>
       <div
+        className="net-loss"
+        style={{
+          visibility: netLoss ? "visible" : "hidden",
+        }}
+        onClick={() => setNetLoss(false)}
+      >
+        CONNECTION LOST{" "}
+        <span style={{ fontFamily: "ttt-user", fontSize: "2em" }}>s</span>START
+        AGAIN
+      </div>
+      <div
         id="footer"
         style={{
-          visibility: playerScores.playerO === "" ? "hidden" : "visible",
+          visibility:
+            Object.keys(playerScores).length === 0 ? "hidden" : "visible",
         }}
       >
         <span>
