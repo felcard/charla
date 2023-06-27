@@ -228,7 +228,7 @@ export default function Main() {
           ? (faceRef.current.style.animationPlayState = "running")
           : (faceRef.current.style.animationPlayState = "paused");
         animationActive = !animationActive;
-        if (fontLoaded.includes("cara")) {
+        if (fontLoaded.includes("comedy")) {
           //if font is loaded then execute the code
           faceRef.current.textContent = abcRandom();
         }

@@ -16,6 +16,11 @@
   src: url("./tools/fonts/Alin_Square_Emoji.woff2") format("woff2");
   font-display: block;
 }
+@font-face {
+  font-family: comedy;
+  src: url("./tools/fonts/Masks3D.woff2") format("woff2");
+  font-display: block;
+}
 * {
   margin: 0px;
   padding: 0px;
@@ -221,8 +226,8 @@ button {
   user-select: none; /* Standard syntax */
   /* ////////////////////////////////////////////////// */
   text-align: center;
-  font-family: cara;
-  font-size: 15em;
+  font-family: comedy;
+  font-size: 18em;
   letter-spacing: 0.2em;
   padding-left: 0.1em;
   background: linear-gradient(90deg, #00e7dc, #ff00ff);
@@ -331,7 +336,7 @@ button {
   }
   #face {
     width: 100%;
-    font-size: 8.3em;
+    font-size: 12em;
   }
   .onHover {
     right: -2em;
