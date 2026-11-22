@@ -1,5 +1,5 @@
 {
-  "name": "charla",
+  "name": "charla-server",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -10,15 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/felcard/socket-be.git"
+    "url": "git+https://github.com/felcard/charla.git",
+    "directory": "server"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/felcard/socket-be/issues"
+    "url": "https://github.com/felcard/charla/issues"
   },
-  "homepage": "https://github.com/felcard/socket-be#readme",
+  "homepage": "https://github.com/felcard/charla#readme",
   "dependencies": {
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1"
