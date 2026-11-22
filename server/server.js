@@ -7,6 +7,7 @@ const io = new Server(server, {
     //pingTimeout: 120000,
 });
 const crawler = require('./crawler');
+const { isSize, isFullBoard, isMove } = require('./validate');
 //guests object to monitor user connections for cases when the user disconnects and the disconnection event
 //arrives after the user's socket has re-connected and avoid sending disconnection message.
 //guests object is outside io connection since for each connection there is a new instance and if the
@@ -52,23 +53,33 @@ io.on('connection', (socket) => {
             io.to(room.name).emit('message', { msg: data, user: room.user });
         });
         socket.on('playerMove', move => {
+            if (!isMove(move)) return;
             if (Object.keys(guests[room.name]).length > 1) {
-                io.to(room.name).emit('playerMove', move);
-                playerTurn = socket.id;
+                const { rowInd, colInd, item, id } = move;
+                io.to(room.name).emit('playerMove', { rowInd, colInd, item, id });
             }
         });
         socket.on('colChange', col => {
+            if (!isSize(col)) return;
             if (Object.keys(guests[room.name]).length > 1) {
-                io.to(room.name).emit('colChange', col);
+                io.to(room.name).emit('colChange', Number(col));
             }
         });
         socket.on('winLineChange', winLine => {
+            if (!isSize(winLine)) return;
             if (Object.keys(guests[room.name]).length > 1) {
-                io.to(room.name).emit('winLineChange', winLine);
+                io.to(room.name).emit('winLineChange', Number(winLine));
             }
         });
-        socket.on('arr2crawl', ({ winLine, arr }) => {
-            io.to(room.name).emit('arr2crawl', crawler(winLine, arr));
+        socket.on('arr2crawl', payload => {
+            const { winLine, arr } = payload || {};
+            if (!isFullBoard(arr) || !isSize(winLine) || Number(winLine) > arr.length) return;
+            try {
+                io.to(room.name).emit('arr2crawl', crawler(Number(winLine), arr));
+            } catch (err) {
+                // never let one bad game take the whole server down
+                console.error('Scoring failed:', err);
+            }
         });
         socket.on('disconnecting', () => {
             //this avoids sending delayed disconnected message after the user has re-joined
