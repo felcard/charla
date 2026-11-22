@@ -20,6 +20,11 @@ let guests = {};
 io.on('connection', (socket) => {
     console.log(`user: ${socket.id} connected to MAIN`);
     socket.on('room', room => {
+        //ignore malformed join requests instead of crashing on them
+        if (!room || typeof room.name !== 'string' || typeof room.user !== 'string' ||
+            !room.name.trim() || !room.user.trim()) return;
+        //a socket joins one room only; joining again would register every listener twice
+        if (socket.data.room) return;
         //check if room exists in main socket's adapter object, create it if not
         if (!io.sockets.adapter.rooms.has(room.name)) {
             socket.join(room.name);
@@ -37,8 +42,11 @@ io.on('connection', (socket) => {
                 socket.emit('room', 'ROOM TAKEN');
                 socket.emit('message', { msg: 'INCORRECT ROOM CODE : Reload page and try again', user: room.user });
                 socket.disconnect();
+                //stop here: a rejected user must not be counted as a guest or get room listeners
+                return;
             }
         }
+        socket.data.room = room.name;
         socket.emit('joined', 'joined room');
         //create object for each room name containing all user objects with counter number 
         //nullish coalescing operator (??) is used to provide default values ({} and 0) in case the nested properties are null or undefined
