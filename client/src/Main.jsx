@@ -259,6 +259,14 @@ export default function Main() {
     setFaceRefLoaded(true);
     //when the javascript (including useEffect blocks) are first loaded all the useRef's .current will be undefined since the comnponent hasn't rendered any html yet so this useEffect is a flag that will turn true after the javascript have loaded and the component rendered for the first time allowing useRef variables to get a current value and avoid undefined errors especially in cases where the .? operator cant be used since although avoids throwing an error it returns undefined which in somecases casues error anyway. So in the useEffect blocks where useRef elements are used we add as dependency the flag so there is a second rendered where useRef elements would be usable/defined. NOT SURE Whether this approach is the best?????
   }, []);
+  useEffect(() => {
+    //the game panel unmounts once a third person joins; if it was on screen,
+    //bring the chat back instead of leaving an empty page
+    if (numberOfPlayers >= 3) {
+      document.getElementById("cont").style.display = "block";
+    }
+  }, [numberOfPlayers]);
+
   const handleGameOn = () => {
     if (numberOfPlayers < 3) {
       document.getElementById("cont").style.display = "none";
@@ -269,7 +277,9 @@ export default function Main() {
   };
   return (
     <div>
-      {numberOfPlayers < 3 && <TTT socket={socket} />}
+      {numberOfPlayers < 3 && (
+        <TTT socket={socket} playersInRoom={numberOfPlayers} />
+      )}
       <div id="cont">
         {numberOfPlayers < 3 && (
           <div id="main-game-on" onClick={handleGameOn} className="onHover">

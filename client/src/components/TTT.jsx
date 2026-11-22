@@ -3,14 +3,13 @@ import { useState, useRef, useEffect } from "react";
 
 //IN CASES OF NETWORK DISCONNECTION and not wanting to do a full board reset and stop the game on disconnection then sassion storage will need to be used to keep records of board and user moves and in cases when one user disconnects and the other user having the play turn and playing, when the user re-connects there should be a record of last play kept by server and so when the user reconnects the client will check the last play on his board matches the last played in the server by the other player.
 
-function TTT({ socket }) {
+function TTT({ socket, playersInRoom }) {
   const [move, setMove] = useState("X");
   const [playerScores, setPlayerScores] = useState({});
   //const [cellSize, setCellSize] = useState(0);
   const [winLineLength, setWinLineLength] = useState(3);
   const [col, setCols] = useState(3);
   const [netLoss, setNetLoss] = useState(false);
-  const [playersInRoom, setPlayersInRoom] = useState(0);
   const boardRef = useRef(null);
   const colsSelect = useRef([]);
   const playerMoveCount = useRef(0);
@@ -100,7 +99,10 @@ function TTT({ socket }) {
   };
 
   useEffect(() => {
-    socket.on("playerMove", ({ rowInd, colInd, item, id }) => {
+    //named handlers so cleanup can remove exactly these listeners. The socket is
+    //shared with the chat, so it must stay connected when this panel unmounts
+    //(which happens whenever a third person joins the room).
+    const onPlayerMove = ({ rowInd, colInd, item, id }) => {
       noDoublePlayRef.current = true;
       playerId.current = id;
       playerMoveCount.current++;
@@ -115,36 +117,39 @@ function TTT({ socket }) {
         });
       }
       setMove(item);
-    });
-    socket.on("arr2crawl", (results) => {
+    };
+    const onScores = (results) => {
       if (flag.current) {
         setPlayerScores(results);
         flag.current = false;
       }
-    });
-
-    socket.on("colChange", (col) => {
+    };
+    const onColChange = (col) => {
       setCols(parseInt(col));
       boardInit.current(col);
       flag.current = true;
-    });
-
-    socket.on("winLineChange", (winLine) => {
+    };
+    const onWinLineChange = (winLine) => {
       setWinLineLength(parseInt(winLine));
-    });
-    socket.on("playersInRoom", (numOfPlayers) => {
-      setPlayersInRoom(numOfPlayers);
-    });
-    socket.on("disconnect", () => {
+    };
+    const onDisconnect = () => {
       boardInit.current(3);
       setCols(3);
       setNetLoss(true);
-    });
+    };
+
+    socket.on("playerMove", onPlayerMove);
+    socket.on("arr2crawl", onScores);
+    socket.on("colChange", onColChange);
+    socket.on("winLineChange", onWinLineChange);
+    socket.on("disconnect", onDisconnect);
 
     return () => {
-      console.log("CLEAN UP FUNCTION");
-      socket.removeAllListeners();
-      socket.disconnect();
+      socket.off("playerMove", onPlayerMove);
+      socket.off("arr2crawl", onScores);
+      socket.off("colChange", onColChange);
+      socket.off("winLineChange", onWinLineChange);
+      socket.off("disconnect", onDisconnect);
     };
   }, [socket]);
 
