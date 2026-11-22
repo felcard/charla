@@ -24,16 +24,22 @@ const makeUserColorAndFont = () => {
 };
 export const fontColor = makeUserColorAndFont();
 
+//rudeWords is a comma-separated list; entries may be look-alikes ("b!tch") or phrases ("blow job")
 export const isRude = (rudeWords, userInput) => {
-    const rudeArr = rudeWords.split(",");
-    //separator is the regular expression \b, which matches a word boundary. A word boundary is a position between a word character (as defined by \w) and a non-word character (as defined by \W), or between a word character and the start or end of the string.
-    const inputStr = userInput.toLowerCase().split(/\b/);
-    let result = false;
-    for (let word of inputStr) {
-        if (rudeArr.includes(word)) result = true;
-        break;
-    }
-    return result;
+    const rudeList = rudeWords.split(",").map((w) => w.trim()).filter(Boolean);
+    const text = userInput.toLowerCase();
+    const notLetterOrDigit = /[^\p{L}\p{N}]+/gu;
+    //each word as typed, minus surrounding punctuation, keeps look-alikes whole ("b!tch,") ...
+    const typedWords = text
+        .split(/\s+/)
+        .map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""));
+    //... and plain letter runs catch words glued together by punctuation ("ok,word")
+    const plainWords = text.split(notLetterOrDigit);
+    const words = new Set([...typedWords, ...plainWords]);
+    const spaced = ` ${text.replace(notLetterOrDigit, " ")} `;
+    return rudeList.some((bad) =>
+        bad.includes(" ") ? spaced.includes(` ${bad} `) : words.has(bad)
+    );
 };
 
 export const abcRandom = (str = '') => {
