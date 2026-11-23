@@ -115,6 +115,8 @@ The client connects to the live server by default. Set `REACT_APP_SERVER_URL` to
 
 ## Background
 
-*Charla* means "chat" in Spanish. The project began as two repositories, one for the client and one for the server, and was merged into this one with its full history.
+*Charla* means "chat" in Spanish. I built it in 2023 as two repositories, one for the client and one for the server.
+
+In November 2026 I came back to it to get it ready to share, using AI-assisted development for this phase: merging the two repositories into this one with their full history, finding and fixing bugs, adding tests and the one-command dev setup, and writing this README. The app itself, its design and the Tic Tac Toe Twist date from 2023; the commits from November 2026 onwards are the AI-assisted improvements.
 
 Built by Fel · [cardini.dev](https://cardini.dev)
