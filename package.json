@@ -1,0 +1,14 @@
+{
+  "name": "charla",
+  "private": true,
+  "description": "Private chat rooms with a twisted Tic Tac Toe, synced over WebSockets",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently --kill-others-on-fail -n server,client -c magenta,cyan \"cross-env PORT=8000 npm run dev --prefix server\" \"cross-env PORT=3000 npm start --prefix client\"",
+    "test": "npm test --prefix client -- --watchAll=false"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7",
+    "cross-env": "^10.1.0"
+  }
+}
